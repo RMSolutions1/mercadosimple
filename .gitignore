@@ -1,0 +1,58 @@
+# ─── Node / npm ───────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ─── Next.js (frontend) ───────────────────────────────────────
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+frontend/next-env.d.ts
+
+# ─── NestJS build (backend) ───────────────────────────────────
+backend/dist/
+backend/.build/
+
+# ─── Variables de entorno — NUNCA subir al repo ───────────────
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ─── Logs ────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── OS / Editor ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Testing ─────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── TypeScript ──────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── Docker ──────────────────────────────────────────────────
+docker-volumes/
+ssl/
+
+# ─── Misc ────────────────────────────────────────────────────
+*.pem
+*.key
+*.cert
