@@ -2,6 +2,32 @@
 
 Guía para dejar **Mercado Simple** listo para operaciones reales en Fly.io.
 
+## Después de un push: pasos en tu máquina (con Fly CLI)
+
+Si el código ya está en GitHub, solo tenés que ejecutar en tu PC (con [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/) instalado y `fly auth login` hecho):
+
+```bash
+# 1. Generar JWT secrets y configurarlos en Fly (guarda backup en backend/.secrets.generated.txt)
+cd backend
+npm run generate-secrets
+
+# 2. Desplegar API
+fly deploy -a mercadosimple-api
+
+# 3. Desplegar frontend (desde la raíz del repo)
+cd ../frontend
+fly deploy -a mercadosimple-web
+```
+
+Si `fly` no está en el PATH al ejecutar `generate-secrets`, los valores se guardan igual en `backend/.secrets.generated.txt`; después podés configurarlos con:
+
+```bash
+cd backend
+fly secrets set JWT_SECRET="..." JWT_REFRESH_SECRET="..." -a mercadosimple-api
+```
+
+(copiando los valores de `.secrets.generated.txt`).
+
 ## URLs actuales
 
 | Servicio | URL |
