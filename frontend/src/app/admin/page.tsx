@@ -371,7 +371,7 @@ export default function AdminDashboardPage() {
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {!sidebarCollapsed && <p className="text-[10px] font-bold uppercase tracking-widest px-3 pb-2" style={{ color: 'rgba(255,255,255,0.25)' }}>Secciones</p>}
           {(() => {
-            const groups = [...new Set(SIDEBAR_ITEMS.map(i => i.group || 'Otros'))];
+            const groups = Array.from(new Set(SIDEBAR_ITEMS.map(i => i.group || 'Otros')));
             return groups.map(group => (
               <div key={group}>
                 {!sidebarCollapsed && (
