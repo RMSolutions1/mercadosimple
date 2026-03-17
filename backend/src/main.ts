@@ -59,8 +59,9 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`🚀 Mercado Simple API corriendo en: http://localhost:${port}/api`);
+  const host = process.env.HOST || '0.0.0.0';
+  await app.listen(port, host);
+  console.log(`🚀 Mercado Simple API corriendo en: http://${host}:${port}/api`);
   console.log(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
 }
 bootstrap();

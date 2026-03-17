@@ -26,14 +26,10 @@ import { Settlement } from '../pago-simple/entities/settlement.entity';
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: parseInt(configService.get('DB_PORT', '5432')),
-        username: configService.get('DB_USERNAME', 'mercadosimple'),
-        password: configService.get('DB_PASSWORD', 'mercadosimple123'),
-        database: configService.get('DB_DATABASE', 'mercadosimple'),
-        entities: [
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get('DATABASE_URL');
+        const base = {
+          entities: [
           User,
           Product,
           Category,
@@ -55,10 +51,23 @@ import { Settlement } from '../pago-simple/entities/settlement.entity';
           QrPayment,
           Settlement,
         ],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') === 'development',
-        ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
-      }),
+          synchronize: configService.get('NODE_ENV') !== 'production',
+          logging: configService.get('NODE_ENV') === 'development',
+        };
+        if (databaseUrl) {
+          return { ...base, url: databaseUrl, ssl: { rejectUnauthorized: false } };
+        }
+        return {
+          ...base,
+          type: 'postgres',
+          host: configService.get('DB_HOST', 'localhost'),
+          port: parseInt(configService.get('DB_PORT', '5432')),
+          username: configService.get('DB_USERNAME', 'mercadosimple'),
+          password: configService.get('DB_PASSWORD', 'mercadosimple123'),
+          database: configService.get('DB_DATABASE', 'mercadosimple'),
+          ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+        };
+      },
       inject: [ConfigService],
     }),
   ],

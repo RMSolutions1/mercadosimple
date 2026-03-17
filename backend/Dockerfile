@@ -14,11 +14,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Sólo las dependencias de producción
-COPY package*.json ./
-RUN npm ci --only=production --ignore-scripts && npm cache clean --force
-
-# Copiamos el build
+# Usar node_modules del builder (bcrypt y otros nativos ya compilados)
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 
 # Usuario no-root por seguridad

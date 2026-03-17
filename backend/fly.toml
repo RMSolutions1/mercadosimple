@@ -1,0 +1,40 @@
+# fly.toml app configuration file generated for mercadosimple-api on 2026-03-17T10:51:04-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'mercadosimple-api'
+primary_region = 'gru'
+
+[build]
+
+[env]
+  NODE_ENV = 'production'
+  PORT = '3001'
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'requests'
+    hard_limit = 25
+    soft_limit = 20
+
+[checks]
+  [checks.health]
+    port = 3001
+    type = 'http'
+    interval = '30s'
+    timeout = '10s'
+    path = '/api/health'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 512
