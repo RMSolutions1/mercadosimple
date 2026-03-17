@@ -56,7 +56,12 @@ import { Settlement } from '../pago-simple/entities/settlement.entity';
           logging: configService.get('NODE_ENV') === 'development',
         };
         if (databaseUrl) {
-          return { ...base, url: databaseUrl, ssl: { rejectUnauthorized: false } };
+          return {
+            ...base,
+            type: 'postgres',
+            url: databaseUrl,
+            ssl: { rejectUnauthorized: false },
+          };
         }
         return {
           ...base,
