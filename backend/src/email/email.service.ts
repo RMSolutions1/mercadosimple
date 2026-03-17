@@ -1,12 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Resend } from 'resend';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: Transporter;
+  private transporter: Transporter | null = null;
+  private resend: Resend | null = null;
   private fromAddress: string;
   private appUrl: string;
 
@@ -16,6 +18,15 @@ export class EmailService {
       'SMTP_FROM',
       '"Mercado Simple" <noreply@mercadosimple.com.ar>',
     );
+
+    const resendKey = this.configService.get('RESEND_API_KEY');
+    if (resendKey) {
+      this.resend = new Resend(resendKey);
+      const from = this.configService.get('RESEND_FROM', this.fromAddress);
+      this.fromAddress = from;
+      this.logger.log('Email configurado con Resend API.');
+      return;
+    }
 
     const smtpHost = this.configService.get('SMTP_HOST');
     const smtpUser = this.configService.get('SMTP_USER');
@@ -28,8 +39,8 @@ export class EmailService {
         secure: this.configService.get('SMTP_SECURE') === 'true',
         auth: { user: smtpUser, pass: smtpPass },
       });
+      this.logger.log('Email configurado con SMTP.');
     } else {
-      // Modo preview: crea una cuenta de prueba en Ethereal Email automáticamente
       this.initEtherealTransport();
     }
   }
@@ -52,6 +63,24 @@ export class EmailService {
   }
 
   private async send(to: string, subject: string, html: string): Promise<string | null> {
+    if (this.resend) {
+      try {
+        const { data, error } = await this.resend.emails.send({
+          from: this.fromAddress,
+          to: [to],
+          subject,
+          html,
+        });
+        if (error) {
+          this.logger.error(`Resend error a ${to}: ${error.message}`);
+          return null;
+        }
+        return data?.id ?? null;
+      } catch (err: any) {
+        this.logger.error(`Error al enviar email a ${to}: ${err?.message}`);
+        return null;
+      }
+    }
     if (!this.transporter) {
       this.logger.warn(`Email no enviado (sin transporte): ${subject} → ${to}`);
       return null;
@@ -68,8 +97,8 @@ export class EmailService {
         this.logger.log(`Preview email: ${previewUrl}`);
       }
       return info.messageId;
-    } catch (err) {
-      this.logger.error(`Error al enviar email a ${to}: ${err.message}`);
+    } catch (err: any) {
+      this.logger.error(`Error al enviar email a ${to}: ${err?.message}`);
       return null;
     }
   }

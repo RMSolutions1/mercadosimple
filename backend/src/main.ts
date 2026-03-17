@@ -58,6 +58,16 @@ async function bootstrap() {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Advertencia Mercado Pago en producción
+  if (process.env.NODE_ENV === 'production') {
+    const mpToken = process.env.MP_ACCESS_TOKEN;
+    if (!mpToken || mpToken.startsWith('TEST-')) {
+      console.warn(
+        '⚠️  Producción: MP_ACCESS_TOKEN no está configurado o es de pruebas (TEST-). Configurá un token de producción para pagos reales.',
+      );
+    }
+  }
+
   const port = process.env.PORT || 3001;
   const host = process.env.HOST || '0.0.0.0';
   await app.listen(port, host);

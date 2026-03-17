@@ -3,6 +3,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString, IsBoolean, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AdminService } from './admin.service';
+import { SeedService } from '../database/seeds/seed.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -74,7 +75,20 @@ class UpdateOrderStatusDto {
 @Roles(UserRole.ADMIN)
 @ApiBearerAuth()
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly seedService: SeedService,
+  ) {}
+
+  @Post('seed')
+  @ApiOperation({ summary: 'Ejecutar seed de la base de datos (solo producción/entorno controlado)' })
+  async runSeed() {
+    await this.seedService.run();
+    return {
+      ok: true,
+      message: 'Seed ejecutado correctamente. Revisar logs del servidor para credenciales de prueba.',
+    };
+  }
 
   @Get('dashboard')
   @ApiOperation({ summary: 'Métricas del dashboard' })

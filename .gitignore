@@ -18,6 +18,9 @@ backend/.build/
 # ─── Variables de entorno — NUNCA subir al repo ───────────────
 .env
 .env.local
+.env.*.local
+.secrets.generated.txt
+backend/.secrets.generated.txt
 .env.development
 .env.production
 .env.test

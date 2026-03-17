@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
+import { DatabaseSeedsModule } from '../database/database-seeds.module';
 import { User } from '../users/entities/user.entity';
 import { Product } from '../products/entities/product.entity';
 import { Order } from '../orders/entities/order.entity';
@@ -11,7 +12,10 @@ import { WalletTransaction } from '../wallet/entities/wallet-transaction.entity'
 import { TransferReceipt } from '../wallet/entities/transfer-receipt.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Product, Order, Payment, Wallet, WalletTransaction, TransferReceipt])],
+  imports: [
+    TypeOrmModule.forFeature([User, Product, Order, Payment, Wallet, WalletTransaction, TransferReceipt]),
+    DatabaseSeedsModule,
+  ],
   providers: [AdminService],
   controllers: [AdminController],
 })
