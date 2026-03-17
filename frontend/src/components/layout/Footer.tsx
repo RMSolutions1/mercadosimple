@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Facebook, Instagram, Twitter, Youtube, Shield, Truck, CreditCard, Headphones, MapPin, Mail } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Youtube, Shield, Truck, CreditCard, Headphones } from 'lucide-react';
 import { SolMayo } from '@/components/ui/SolMayo';
 
 const FOOTER_COLS = [
@@ -89,15 +89,22 @@ export function Footer() {
             <p className="text-gray-500 text-xs leading-relaxed mb-4">
               La plataforma de e-commerce más confiable de Argentina. Comprá y vendé con total seguridad.
             </p>
-            {/* Social */}
-            <div className="flex gap-3">
+            {/* Social: enlace a contacto hasta tener perfiles reales (evita links muertos = más confianza) */}
+            <div className="flex items-center gap-3">
+              <span className="text-gray-500 text-xs">Seguinos:</span>
               {[
-                { Icon: Facebook,  href: '#', hover: 'hover:text-blue-400' },
-                { Icon: Instagram, href: '#', hover: 'hover:text-pink-400' },
-                { Icon: Twitter,   href: '#', hover: 'hover:text-sky-400' },
-                { Icon: Youtube,   href: '#', hover: 'hover:text-red-400' },
-              ].map(({ Icon, href, hover }) => (
-                <Link key={href + Icon.name} href={href} className={`text-gray-600 ${hover} transition-colors`}>
+                { Icon: Facebook,  label: 'Facebook',  hover: 'hover:text-blue-400' },
+                { Icon: Instagram, label: 'Instagram', hover: 'hover:text-pink-400' },
+                { Icon: Twitter,   label: 'X',         hover: 'hover:text-sky-400' },
+                { Icon: Youtube,   label: 'YouTube',   hover: 'hover:text-red-400' },
+              ].map(({ Icon, label, hover }) => (
+                <Link
+                  key={label}
+                  href="/contacto"
+                  aria-label={`${label} - próximamente`}
+                  title="Próximamente en redes"
+                  className={`text-gray-500 ${hover} transition-colors`}
+                >
                   <Icon className="w-4 h-4" />
                 </Link>
               ))}

@@ -12,10 +12,15 @@ import toast from 'react-hot-toast';
 
 function CountdownTimer({ targetTime }: { targetTime: Date }) {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [expired, setExpired] = useState(false);
   useEffect(() => {
     const calc = () => {
       const diff = targetTime.getTime() - Date.now();
-      if (diff <= 0) return;
+      if (diff <= 0) {
+        setExpired(true);
+        return;
+      }
+      setExpired(false);
       setTimeLeft({ hours: Math.floor(diff / 3600000), minutes: Math.floor((diff % 3600000) / 60000), seconds: Math.floor((diff % 60000) / 1000) });
     };
     calc();
@@ -23,6 +28,13 @@ function CountdownTimer({ targetTime }: { targetTime: Date }) {
     return () => clearInterval(id);
   }, [targetTime]);
   const pad = (n: number) => n.toString().padStart(2, '0');
+  if (expired) {
+    return (
+      <span className="bg-white/20 text-white font-bold px-4 py-2 rounded-lg text-sm">
+        Nuevas ofertas mañana
+      </span>
+    );
+  }
   return (
     <div className="flex items-center gap-1.5">
       {[timeLeft.hours, timeLeft.minutes, timeLeft.seconds].map((val, i) => (
@@ -169,10 +181,20 @@ export default function OfertasPage() {
             ))}
           </div>
         ) : productsWithDiscount.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">😔</div>
-            <p className="text-gray-500 text-lg">No hay ofertas disponibles en esta categoría</p>
-            <Link href="/productos" className="mt-4 inline-block text-ms-blue underline">Ver todos los productos</Link>
+          <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 px-6">
+            <div className="text-5xl mb-4">🔍</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Aún no hay ofertas con descuento</h3>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              Explorá todo el catálogo y encontrá los mejores precios. Nuevas ofertas se suman todos los días.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/productos" className="inline-flex items-center justify-center gap-2 bg-ms-blue text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition">
+                Ver todos los productos
+              </Link>
+              <Link href="/" className="inline-flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 transition">
+                Volver al inicio
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

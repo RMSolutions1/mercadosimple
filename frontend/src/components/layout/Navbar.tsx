@@ -25,7 +25,7 @@ const MEGA_MENU_CATEGORIES = [
   { name: 'Moda', emoji: '👗', slug: 'moda', subs: ['Ropa Mujer', 'Ropa Hombre', 'Calzado', 'Accesorios'] },
   { name: 'Hogar y Deco', emoji: '🛋️', slug: 'hogar', subs: ['Muebles', 'Decoración', 'Iluminación', 'Jardín'] },
   { name: 'Deportes', emoji: '⚽', slug: 'deportes', subs: ['Fitness', 'Fútbol', 'Running', 'Ciclismo'] },
-  { name: 'Campo y Agro', emoji: '🌾', slug: 'campo', subs: ['Herramientas', 'Semillas', 'Riego', 'Tractores'] },
+  { name: 'Campo y Agro', emoji: '🌾', slug: 'agro', subs: ['Herramientas', 'Semillas', 'Riego', 'Tractores'] },
   { name: 'Industria', emoji: '⚙️', slug: 'industria', subs: ['Maquinaria', 'Herramientas', 'Seguridad', 'Minería'] },
 ];
 

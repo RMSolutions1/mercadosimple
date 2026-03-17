@@ -8,9 +8,9 @@ import { ConditionalLayout } from '@/components/layout/ConditionalLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Mercado Simple - Compra y vende lo que quieras',
-  description: 'La plataforma marketplace más simple de Argentina. Compra y vende electrónica, ropa, deportes y más.',
-  keywords: 'marketplace, compra, venta, argentina, mercado',
+  title: 'Mercado Simple - Compra y vende lo que quieras | 🇦🇷 Argentina',
+  description: 'Marketplace argentino con Compra Protegida y Pago Simple. Comprá y vendé electrónica, moda, deportes, agro y más. Envío a todo el país.',
+  keywords: 'marketplace argentina, compra protegida, venta online, Pago Simple, envíos, tecnología, moda, deportes',
 };
 
 export default function RootLayout({

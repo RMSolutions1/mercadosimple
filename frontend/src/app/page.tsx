@@ -21,8 +21,7 @@ const CATEGORIES = [
   { name: 'Gaming', slug: 'gaming', emoji: '🎮', color: 'from-purple-600 to-purple-700', icon: '🕹️' },
   { name: 'Autos y Motos', slug: 'vehiculos', emoji: '🚗', color: 'from-red-600 to-red-700', icon: '🚘' },
   { name: '🌾 Campo y Agro', slug: 'agro', emoji: '🚜', color: 'from-[#4A7C2B] to-[#6B8F3A]', icon: '🌾' },
-  { name: '⛏️ Minería', slug: 'industria', emoji: '⚙️', color: 'from-[#5A4A3A] to-[#7A6652]', icon: '⛏️' },
-  { name: '🛢️ Industrial', slug: 'industria', emoji: '🏭', color: 'from-[#2C4A6B] to-[#3A6080]', icon: '🏭' },
+  { name: 'Industria y Minería', slug: 'industria', emoji: '🏭', color: 'from-[#2C4A6B] to-[#3A6080]', icon: '🏭' },
   { name: 'Bebés', slug: 'bebes', emoji: '👶', color: 'from-yellow-400 to-yellow-500', icon: '🍼' },
   { name: 'Belleza', slug: 'belleza', emoji: '💄', color: 'from-rose-500 to-rose-600', icon: '✨' },
   { name: 'Libros', slug: 'libros', emoji: '📚', color: 'from-teal-600 to-teal-700', icon: '📖' },
@@ -96,11 +95,16 @@ const BRANDS = [
 
 function CountdownTimer({ targetTime }: { targetTime: Date }) {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [expired, setExpired] = useState(false);
 
   useEffect(() => {
     const calc = () => {
       const diff = targetTime.getTime() - Date.now();
-      if (diff <= 0) return;
+      if (diff <= 0) {
+        setExpired(true);
+        return;
+      }
+      setExpired(false);
       setTimeLeft({
         hours: Math.floor(diff / 3600000),
         minutes: Math.floor((diff % 3600000) / 60000),
@@ -113,6 +117,14 @@ function CountdownTimer({ targetTime }: { targetTime: Date }) {
   }, [targetTime]);
 
   const pad = (n: number) => n.toString().padStart(2, '0');
+
+  if (expired) {
+    return (
+      <span className="bg-white/20 text-white text-sm font-bold px-3 py-1.5 rounded-lg">
+        Nuevas ofertas mañana
+      </span>
+    );
+  }
 
   return (
     <div className="flex items-center gap-1">
@@ -248,6 +260,13 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        ) : featuredProducts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 md:p-12 text-center">
+            <p className="text-gray-600 mb-2">Explorá miles de productos con los mejores precios.</p>
+            <Link href="/productos" className="inline-flex items-center gap-2 bg-ms-blue text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition">
+              Ver todos los productos <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {featuredProducts.slice(0, 10).map((product) => (
@@ -324,6 +343,13 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        ) : featuredProducts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <p className="text-gray-600 mb-4">Descubrí productos para vos.</p>
+            <Link href="/productos" className="inline-flex items-center gap-2 text-ms-blue font-semibold hover:underline">
+              Explorar catálogo <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {featuredProducts.slice(0, 8).map((product) => (
@@ -372,20 +398,20 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* BANNER VENDER */}
+      {/* BANNER VENDER — CTA principal: registro vendedor */}
       <section className="max-w-7xl mx-auto px-4 py-8 pb-12">
         <div className="bg-gradient-to-r from-ms-blue to-blue-700 rounded-2xl p-8 text-white flex flex-col md:flex-row items-center gap-6">
           <div className="text-4xl">🏪</div>
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-1">¿Tenés algo para vender?</h2>
-            <p className="text-white/80">Publicá gratis y llegá a millones de compradores en todo el país.</p>
+            <p className="text-white/80">Publicá gratis, sin costo fijo. Llegá a compradores en todo el país con Compra Protegida.</p>
           </div>
-          <div className="flex gap-3">
-            <Link href="/como-vender" className="bg-white/20 border border-white/30 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-white/30 transition text-sm">
-              Cómo vender
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/auth/registro?role=seller" className="bg-ms-yellow text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-yellow-400 transition text-sm text-center shadow-lg">
+              Empezar a vender — Es gratis
             </Link>
-            <Link href="/auth/registro?role=seller" className="bg-ms-yellow text-gray-900 font-bold px-5 py-2.5 rounded-xl hover:bg-yellow-400 transition text-sm">
-              Empezar a vender
+            <Link href="/como-vender" className="border-2 border-white/50 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition text-sm text-center">
+              Cómo vender
             </Link>
           </div>
         </div>
