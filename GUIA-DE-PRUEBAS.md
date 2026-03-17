@@ -2,7 +2,8 @@
 
 > **Versión:** 1.0.0 — Marzo 2026  
 > **Estado:** ✅ Listo para pruebas reales  
-> **URLs locales:** Frontend → http://localhost:3000 | API → http://localhost:3001/api
+> **URLs locales:** Frontend → http://localhost:3000 | API → http://localhost:3001/api  
+> **Producción (Fly.io):** Frontend → https://mercadosimple-web.fly.dev | API → https://mercadosimple-api.fly.dev/api
 
 ---
 
@@ -63,7 +64,7 @@ Smartphones · Televisores · Laptops y PC · Audio · Gaming · Tablets · Cám
 #### A. Registro nuevo comprador
 1. Ir a → http://localhost:3000/auth/registro
 2. Elegir "Quiero comprar"
-3. Completar datos (nombre, email real, contraseña mínimo 6 chars con número y mayúscula)
+3. Completar datos (nombre, email real, contraseña mínimo **8 caracteres** con número y mayúscula)
 4. Hacer clic en "Crear cuenta"
 5. ✅ Deberías ser redirigido al inicio con sesión iniciada
 

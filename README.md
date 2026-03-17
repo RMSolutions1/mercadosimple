@@ -10,9 +10,9 @@ Plataforma marketplace full-stack para Argentina, competidora directa de Mercado
 | Backend | NestJS, TypeScript, TypeORM |
 | Base de datos | PostgreSQL 16 |
 | Autenticación | JWT + Refresh Tokens, bcrypt (costo 12) |
-| Email | Nodemailer (SMTP configurable) |
+| Email | Nodemailer (SMTP) o Resend API |
 | Pagos | Mercado Pago SDK + Billetera interna (Pago Simple) |
-| Infraestructura | Docker, Nginx, Let's Encrypt |
+| Infraestructura | Docker, Nginx, Let's Encrypt · **Fly.io** (ver [DEPLOY.md](DEPLOY.md)) |
 
 ---
 
@@ -26,7 +26,7 @@ Plataforma marketplace full-stack para Argentina, competidora directa de Mercado
 ### 1. Clonar y configurar entorno
 
 ```bash
-git clone https://github.com/tu-org/mercado-simple.git
+git clone https://github.com/RMSolutions1/mercadosimple.git
 cd "mercado simple"
 
 # Iniciar base de datos
@@ -55,15 +55,19 @@ npm run dev            # http://localhost:3000
 
 ## Despliegue en producción
 
+**Opción A — Fly.io (recomendado):** Ver guía completa en **[DEPLOY.md](DEPLOY.md)** (URLs, seed en producción, secrets, Resend, Mercado Pago, dominio propio).
+
+**Opción B — Docker (VPS/servidor propio):**
+
 ### 1. Configurar variables de entorno
 
 ```bash
-cp .env.example .env
-# Editar .env con TODOS los valores reales:
-# - JWT_SECRET y JWT_REFRESH_SECRET: generar con `openssl rand -base64 64`
-# - Credenciales SMTP reales
+cd backend && cp .env.example .env
+# Editar backend/.env con valores reales (ver backend/.env.example):
+# - JWT_SECRET y JWT_REFRESH_SECRET (o usar: npm run generate-secrets)
+# - Email: RESEND_API_KEY o SMTP_*
 # - MP_ACCESS_TOKEN y MP_PUBLIC_KEY de Mercado Pago
-# - Contraseñas de base de datos seguras
+# - Contraseñas de base de datos
 ```
 
 ### 2. Levantar toda la infraestructura
@@ -103,11 +107,15 @@ docker-compose exec backend node dist/database/seeds/run-seed.js
 
 ## Cuentas de prueba
 
+Tras ejecutar `npm run seed` en el backend (o el seed en producción, ver [DEPLOY.md](DEPLOY.md)):
+
 | Rol | Email | Contraseña |
 |-----|-------|-----------|
 | Administrador | admin@mercadosimple.com | Admin123* |
-| Vendedor | vendedor@mercadosimple.com | Vendedor123* |
+| Vendedor | techstore@mercadosimple.com | Vendedor123* |
 | Comprador | comprador@mercadosimple.com | Comprador123* |
+
+Listado completo de vendedores y compradores en **[GUIA-DE-PRUEBAS.md](GUIA-DE-PRUEBAS.md)**.
 
 ---
 

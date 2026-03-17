@@ -35,7 +35,7 @@ const ROLE_OPTIONS = [
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
-    { label: 'Al menos 6 caracteres', ok: password.length >= 6 },
+    { label: 'Al menos 8 caracteres', ok: password.length >= 8 },
     { label: 'Contiene número', ok: /\d/.test(password) },
     { label: 'Contiene mayúscula', ok: /[A-Z]/.test(password) },
   ];
@@ -86,6 +86,7 @@ function RegisterForm() {
   });
 
   const selectedRole = ROLE_OPTIONS.find(r => r.value === form.role)!;
+  const RoleIcon = selectedRole.icon;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,7 +99,9 @@ function RegisterForm() {
       if (form.role === 'seller') router.push('/vendedor/dashboard');
       else router.push('/mi-cuenta');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al registrarse');
+      const msg = error.response?.data?.message;
+      const text = Array.isArray(msg) ? msg[0] : msg;
+      toast.error(text || error.message || 'Error al registrarse');
     }
   };
 
@@ -267,7 +270,7 @@ function RegisterForm() {
                       ← Cambiar
                     </button>
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: selectedRole.bg, color: selectedRole.color }}>
-                      <selectedRole.icon className="w-3.5 h-3.5" />
+                      <RoleIcon className="w-3.5 h-3.5" />
                       {selectedRole.title}
                     </div>
                   </div>
@@ -298,7 +301,7 @@ function RegisterForm() {
                     <div className="relative">
                       <input type={showPassword ? 'text' : 'password'} value={form.password}
                         onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
-                        required minLength={6} placeholder="Mínimo 6 caracteres"
+                        required minLength={8} placeholder="Mínimo 8 caracteres"
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all pr-11" />
                       <button type="button" onClick={() => setShowPassword(p => !p)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
@@ -325,7 +328,7 @@ function RegisterForm() {
                         <XCircle className="w-3 h-3" /> Las contraseñas no coinciden
                       </p>
                     )}
-                    {form.confirmPassword && form.password === form.confirmPassword && form.password.length >= 6 && (
+                    {form.confirmPassword && form.password === form.confirmPassword && form.password.length >= 8 && (
                       <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" /> Contraseñas coinciden
                       </p>
