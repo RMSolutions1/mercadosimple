@@ -20,7 +20,7 @@ import { formatPrice, formatDate } from '@/lib/utils';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
-type Tab = 'resumen' | 'billetera' | 'depositar' | 'transferir' | 'historial' | 'qr' | 'servicios' | 'pedidos' | 'perfil' | 'favoritos' | 'mensajes' | 'seguridad' | 'direcciones' | 'configuracion' | 'notificaciones';
+type Tab = 'resumen' | 'billetera' | 'depositar' | 'transferir' | 'retirar' | 'historial' | 'qr' | 'servicios' | 'pedidos' | 'perfil' | 'favoritos' | 'mensajes' | 'seguridad' | 'direcciones' | 'configuracion' | 'notificaciones';
 
 // ── Catálogo completo de servicios basado en rubros de Rapipago/PagoFácil ──
 const SERVICE_CATEGORIES = [
