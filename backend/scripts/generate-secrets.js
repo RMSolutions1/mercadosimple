@@ -5,6 +5,20 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+function getFlyPath() {
+  const isWin = process.platform === 'win32';
+  if (isWin) {
+    const home = process.env.USERPROFILE || process.env.HOME || '';
+    const flyExe = path.join(home, '.fly', 'bin', 'flyctl.exe');
+    if (fs.existsSync(flyExe)) return flyExe;
+  } else {
+    const home = process.env.HOME || '';
+    const flyLocal = path.join(home, '.fly', 'bin', 'flyctl');
+    if (fs.existsSync(flyLocal)) return flyLocal;
+  }
+  return 'fly';
+}
+
 const JWT_SECRET = crypto.randomBytes(64).toString('base64');
 const JWT_REFRESH_SECRET = crypto.randomBytes(64).toString('base64');
 
@@ -17,15 +31,12 @@ JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
 fs.writeFileSync(outPath, content, 'utf8');
 console.log('Secrets guardados en backend/.secrets.generated.txt');
 
-// Escapar comillas dobles para PowerShell/cmd
-const j = (s) => s.replace(/"/g, '\\"');
+const flyCmd = getFlyPath();
+const args = `secrets set "JWT_SECRET=${JWT_SECRET}" "JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}" -a mercadosimple-api`;
 try {
-  execSync(
-    `fly secrets set JWT_SECRET="${j(JWT_SECRET)}" JWT_REFRESH_SECRET="${j(JWT_REFRESH_SECRET)}" -a mercadosimple-api`,
-    { stdio: 'inherit', cwd: backendDir, shell: true }
-  );
+  execSync(`${flyCmd} ${args}`, { stdio: 'inherit', cwd: backendDir, shell: true });
   console.log('Secrets configurados en Fly (mercadosimple-api).');
 } catch (e) {
-  console.warn('No se pudieron configurar los secrets en Fly (¿fly login?). Podés ejecutar:');
+  console.warn('No se pudieron configurar los secrets en Fly (¿fly auth login?). Podés ejecutar:');
   console.log(`  fly secrets set JWT_SECRET="..." JWT_REFRESH_SECRET="..." -a mercadosimple-api`);
 }
