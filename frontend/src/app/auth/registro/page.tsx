@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, ShoppingCart, Store, CheckCircle, Shield, Zap, ChevronRight } from 'lucide-react';
+import { Eye, EyeOff, ShoppingCart, Store, CheckCircle, Shield, Zap, ChevronRight, CreditCard, Smartphone } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import toast from 'react-hot-toast';
 
@@ -95,9 +95,8 @@ function RegisterForm() {
     if (form.password.length < 6) { toast.error('La contraseña debe tener al menos 6 caracteres'); return; }
     try {
       await register({ name: form.name, email: form.email, password: form.password, role: form.role });
-      toast.success('¡Bienvenido a Mercado Simple!');
-      if (form.role === 'seller') router.push('/vendedor/dashboard');
-      else router.push('/mi-cuenta');
+      toast.success('¡Bienvenido a Pago Simple!');
+      router.push('/pago-simple');
     } catch (error: any) {
       const msg = error.response?.data?.message;
       const text = Array.isArray(msg) ? msg[0] : msg;
@@ -106,26 +105,22 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #0F172A 100%)' }}>
-      {/* Left panel - Branding */}
+    <div className="min-h-screen flex" style={{ background: 'linear-gradient(160deg, #0F172A 0%, #1E3A8A 40%, #1E40AF 70%, #2563EB 100%)' }}>
+      {/* Left panel - Branding Pago Simple */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden">
-        {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl" />
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-400/20 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-white/5 to-transparent" />
         </div>
 
         <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-yellow-400 flex items-center justify-center">
-              <span className="text-black font-black text-xl">M</span>
+          <Link href="/pago-simple" className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
+              <Zap className="w-7 h-7 text-[#93C5FD]" />
             </div>
             <div>
-              <div className="flex items-baseline gap-0.5">
-                <span className="font-black text-white text-xl tracking-tight">MERCADO</span>
-                <span className="font-black text-yellow-400 text-xl tracking-tight ml-1">SIMPLE</span>
-              </div>
-              <p className="text-white/40 text-[9px] uppercase tracking-widest">🇦🇷 Hecho en Argentina</p>
+              <span className="font-black text-white text-xl tracking-tight block">Pago Simple</span>
+              <span className="text-blue-200/80 text-xs">por Mercado Simple</span>
             </div>
           </Link>
         </div>
@@ -133,24 +128,22 @@ function RegisterForm() {
         <div className="relative z-10 space-y-8">
           <div>
             <h1 className="text-4xl font-black text-white leading-tight">
-              La plataforma<br />
-              <span className="text-yellow-400">más confiable</span><br />
-              de Argentina
+              Creá tu cuenta y empezá a pagar y cobrar en minutos
             </h1>
-            <p className="text-white/60 text-lg mt-4 leading-relaxed">
-              Comprá y vendé de forma segura con protección total en cada transacción.
+            <p className="text-blue-100/90 text-lg mt-4 leading-relaxed">
+              Billetera digital, pago de servicios, recargas, prepagas y más. Sin costo de apertura.
             </p>
           </div>
 
           <div className="space-y-4">
             {[
-              { icon: Shield, text: 'Compra Protegida en todas las transacciones' },
-              { icon: Zap, text: 'Acreditación instantánea en tu billetera' },
-              { icon: CheckCircle, text: 'Soporte 24/7 para vendedores y compradores' },
+              { icon: Shield, text: 'Datos cifrados y Compra Protegida' },
+              { icon: CreditCard, text: 'Pago de servicios, recargas y prepagas' },
+              { icon: Smartphone, text: 'Links y QR para cobrar al instante' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-yellow-400" />
+                  <Icon className="w-4 h-4 text-blue-300" />
                 </div>
                 <p className="text-white/80 text-sm">{text}</p>
               </div>
@@ -159,12 +152,12 @@ function RegisterForm() {
 
           <div className="flex items-center gap-6 pt-2">
             {[
-              { value: '+2M', label: 'Usuarios activos' },
-              { value: '+500K', label: 'Productos' },
-              { value: '99.8%', label: 'Satisfacción' },
+              { value: 'Sin costo', label: 'Crear cuenta' },
+              { value: '3.5%', label: 'Por transacción' },
+              { value: '24/7', label: 'Disponible' },
             ].map(stat => (
               <div key={stat.label} className="text-center">
-                <p className="text-2xl font-black text-yellow-400">{stat.value}</p>
+                <p className="text-2xl font-black text-blue-200">{stat.value}</p>
                 <p className="text-white/50 text-xs mt-0.5">{stat.label}</p>
               </div>
             ))}
@@ -172,7 +165,7 @@ function RegisterForm() {
         </div>
 
         <div className="relative z-10 text-white/30 text-xs">
-          © 2026 Mercado Simple · Todos los derechos reservados
+          © 2026 Pago Simple · Mercado Simple
         </div>
       </div>
 
@@ -181,17 +174,20 @@ function RegisterForm() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center">
-              <span className="text-black font-black text-sm">M</span>
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-blue-300" />
             </div>
-            <span className="font-black text-white text-lg tracking-tight">MERCADO <span className="text-yellow-400">SIMPLE</span></span>
+            <div>
+              <span className="font-black text-white text-lg block">Pago Simple</span>
+              <span className="text-blue-200/80 text-xs">por Mercado Simple</span>
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             {/* Header */}
             <div className="px-8 pt-8 pb-6">
-              <h2 className="text-2xl font-black text-gray-900">Crear cuenta gratis</h2>
-              <p className="text-gray-500 text-sm mt-1">Sin costo, sin tarjeta. Listo en 2 minutos.</p>
+              <h2 className="text-2xl font-black text-gray-900">Crear cuenta en Pago Simple</h2>
+              <p className="text-gray-500 text-sm mt-1">Sin costo, sin tarjeta. Empezá a pagar y cobrar en 2 minutos.</p>
               <div className="flex items-center gap-2 mt-4">
                 {[1, 2].map(s => (
                   <div key={s} className="flex items-center gap-1">
@@ -209,7 +205,7 @@ function RegisterForm() {
               {/* Step 1: Role selection */}
               {step === 1 && (
                 <div className="space-y-4">
-                  <p className="text-sm font-semibold text-gray-700">¿Cómo vas a usar Mercado Simple?</p>
+                  <p className="text-sm font-semibold text-gray-700">¿Cómo vas a usar Pago Simple?</p>
                   <div className="space-y-3">
                     {ROLE_OPTIONS.map(option => {
                       const Icon = option.icon;
@@ -346,7 +342,7 @@ function RegisterForm() {
                       <Link href="/terminos" className="text-blue-600 hover:underline font-medium">Términos y condiciones</Link>
                       {' '}y la{' '}
                       <Link href="/privacidad" className="text-blue-600 hover:underline font-medium">Política de privacidad</Link>
-                      {' '}de Mercado Simple
+                      {' '}de Pago Simple / Mercado Simple
                     </span>
                   </label>
 
@@ -373,6 +369,10 @@ function RegisterForm() {
                 </form>
               )}
             </div>
+
+            <Link href="/pago-simple" className="block text-center text-sm text-gray-400 hover:text-gray-600 mt-4 pb-2">
+              ← Volver a Pago Simple
+            </Link>
 
             {/* Footer trust indicators */}
             <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-center gap-6">
@@ -405,8 +405,8 @@ function XCircle({ className }: { className?: string }) {
 export default function RegisterPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%)' }}>
-        <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(160deg, #0F172A, #2563EB)' }}>
+        <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <RegisterForm />

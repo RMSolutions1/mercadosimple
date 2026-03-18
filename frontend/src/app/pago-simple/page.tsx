@@ -8,6 +8,7 @@ import {
   Zap, QrCode, Link2, DollarSign, Shield, ChevronRight, ArrowRight, CheckCircle,
   TrendingUp, CreditCard, Wallet, Copy, Plus, ExternalLink, BarChart3, X,
   Menu, ChevronDown, HelpCircle, Facebook, Instagram, Twitter, Youtube,
+  Smartphone, Gift, Home, Heart,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { SolMayo } from '@/components/ui/SolMayo';
@@ -424,6 +425,33 @@ export default function PagoSimplePage() {
                 <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ========== SERVICIOS: PAGO DE SERVICIOS, RECARGAS, PREPAGAS, PINES ========== */}
+        <section id="servicios" className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-3xl font-black text-gray-900 text-center mb-4">Servicios con tu billetera</h2>
+            <p className="text-gray-500 text-center max-w-2xl mx-auto mb-12">Pagá facturas, recargá, gestioná prepagas y más desde Pago Simple.</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: Home, title: 'Pago de servicios', desc: 'Luz, gas, agua, internet, cable y más. Pagá tus facturas al instante.', href: '/mi-cuenta?tab=servicios', color: '#3B82F6' },
+                { icon: Smartphone, title: 'Recargas', desc: 'Recargá celular, datos y planes. Todas las compañías en un solo lugar.', href: '/mi-cuenta?tab=servicios&service=recargas', color: '#10B981' },
+                { icon: Heart, title: 'Prepagas', desc: 'Pagar cuotas de obras sociales y prepagas desde tu billetera.', href: '/mi-cuenta?tab=servicios&service=prepagas', color: '#EC4899' },
+                { icon: Gift, title: 'Pines y gift cards', desc: 'Comprá códigos y gift cards para juegos, streaming y más.', href: '/mi-cuenta?tab=servicios&service=pines', color: '#8B5CF6' },
+              ].map(({ icon: Icon, title, desc, href, color }) => (
+                <Link key={title} href={href} className="group block bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: `${color}18` }}>
+                    <Icon className="w-6 h-6" style={{ color }} />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-blue-600 transition-colors">{title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
+                  <span className="inline-flex items-center gap-1 mt-3 text-sm font-semibold" style={{ color }}>
+                    Ir a servicios <ChevronRight className="w-4 h-4" />
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 

@@ -7,6 +7,7 @@ import { CartDrawer } from '@/components/cart/CartDrawer';
 
 // Rutas que tienen su propio layout (sin Navbar ni Footer global)
 const DASHBOARD_ROUTES = [
+  '/auth',
   '/mi-cuenta',
   '/vendedor/dashboard',
   '/vendedor/productos',
