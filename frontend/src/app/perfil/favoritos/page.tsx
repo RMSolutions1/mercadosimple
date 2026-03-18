@@ -19,7 +19,7 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/favoritos'));
       return;
     }
     fetchFavorites();

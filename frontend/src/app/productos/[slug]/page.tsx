@@ -94,18 +94,20 @@ export default function ProductDetailPage() {
     fetchProduct();
   }, [slug, isAuthenticated]);
 
+  const loginUrl = slug ? '/auth/login?returnUrl=' + encodeURIComponent('/productos/' + slug) : '/auth/login';
+
   const handleAddToCart = async () => {
-    if (!isAuthenticated) { toast.error('Debés iniciar sesión'); router.push('/auth/login'); return; }
+    if (!isAuthenticated) { toast.error('Debés iniciar sesión'); router.push(loginUrl); return; }
     if (product) await addItem(product.id, quantity);
   };
 
   const handleBuyNow = async () => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push(loginUrl); return; }
     if (product) { await addItem(product.id, quantity); router.push('/checkout'); }
   };
 
   const handleToggleFavorite = async () => {
-    if (!isAuthenticated) { toast.error('Debés iniciar sesión'); return; }
+    if (!isAuthenticated) { toast.error('Debés iniciar sesión'); router.push(loginUrl); return; }
     if (!product) return;
     try {
       const { data } = await api.post(`/favorites/${product.id}/toggle`);
@@ -115,7 +117,7 @@ export default function ProductDetailPage() {
   };
 
   const handleContactSeller = async () => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push(loginUrl); return; }
     if (!product) return;
     try {
       const { data } = await api.post('/chat/conversations', { sellerId: product.seller.id, productId: product.id });
@@ -139,7 +141,7 @@ export default function ProductDetailPage() {
 
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) { toast.error('Debés iniciar sesión para preguntar'); router.push('/auth/login'); return; }
+    if (!isAuthenticated) { toast.error('Debés iniciar sesión para preguntar'); router.push(loginUrl); return; }
     if (!product || !newQuestion.trim()) return;
     setSubmittingQuestion(true);
     try {
@@ -706,7 +708,7 @@ export default function ProductDetailPage() {
                   </form>
                   {!isAuthenticated && (
                     <p className="text-xs text-gray-500 mt-2">
-                      <Link href="/auth/login" className="text-ms-blue underline">Iniciá sesión</Link> para hacer una pregunta
+                      <Link href={loginUrl} className="text-ms-blue underline">Iniciá sesión</Link> para hacer una pregunta
                     </p>
                   )}
                 </div>

@@ -38,7 +38,7 @@ export default function NotificacionesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/notificaciones')); return; }
     loadNotifications();
   }, [isAuthenticated]);
 

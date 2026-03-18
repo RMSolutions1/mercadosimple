@@ -33,7 +33,7 @@ export default function DireccionesPage() {
   const [form, setForm] = useState({ label: '', street: '', number: '', floor: '', city: '', province: '', postalCode: '', type: 'home' as const });
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/direcciones')); return; }
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try { setAddresses(JSON.parse(stored)); } catch { /* ignore */ }

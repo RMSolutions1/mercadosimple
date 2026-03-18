@@ -29,8 +29,7 @@ function LoginForm() {
         router.push(decodeURIComponent(returnUrl));
         return;
       }
-      // Redirigir al panel Pago Simple (flujo fintech)
-      router.push('/pago-simple');
+      router.push('/mi-cuenta');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Credenciales inválidas');
     }

@@ -37,7 +37,7 @@ export default function NewProductPage() {
 
   useEffect(() => {
     if (!isAuthenticated || (user?.role !== 'seller' && user?.role !== 'admin')) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=' + encodeURIComponent('/vendedor/productos/nuevo'));
       return;
     }
     fetchCategories();

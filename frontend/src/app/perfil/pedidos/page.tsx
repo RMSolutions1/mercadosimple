@@ -19,7 +19,7 @@ export default function MyOrdersPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/pedidos'));
       return;
     }
     fetchOrders();

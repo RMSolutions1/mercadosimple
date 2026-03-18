@@ -17,7 +17,7 @@ export default function SeguridadPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
-  if (!isAuthenticated) { router.push('/auth/login'); return null; }
+  if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/seguridad')); return null; }
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();

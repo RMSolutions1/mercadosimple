@@ -31,7 +31,7 @@ export default function ConfiguracionPage() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/configuracion')); return; }
     const stored = localStorage.getItem(SETTINGS_KEY);
     if (stored) {
       try { setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) }); } catch { /* ignore */ }

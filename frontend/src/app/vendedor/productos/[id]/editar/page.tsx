@@ -29,7 +29,7 @@ export default function EditProductPage() {
 
   useEffect(() => {
     if (!isAuthenticated || (user?.role !== 'seller' && user?.role !== 'admin')) {
-      router.push('/auth/login');
+      router.push('/auth/login?returnUrl=' + encodeURIComponent('/vendedor/productos/' + productId + '/editar'));
       return;
     }
     Promise.all([fetchProduct(), fetchCategories()]);

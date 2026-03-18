@@ -237,9 +237,11 @@ function MiCuentaContent() {
 
   useEffect(() => {
     setMounted(true);
-    const tab = searchParams.get('tab') as Tab;
-    if (tab) setActiveTab(tab);
   }, []);
+  useEffect(() => {
+    const tab = searchParams.get('tab') as Tab | null;
+    if (tab && ['resumen','billetera','depositar','transferir','retirar','historial','qr','servicios','pedidos','perfil','favoritos','mensajes','seguridad','direcciones','configuracion','notificaciones'].includes(tab)) setActiveTab(tab);
+  }, [searchParams]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
@@ -512,7 +514,7 @@ function MiCuentaContent() {
   const [showPw, setShowPw] = useState({ current: false, new: false });
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/mi-cuenta')); return; }
     fetchWallet();
     fetchTransactions();
   }, [isAuthenticated]);

@@ -28,7 +28,8 @@ function ChatContent() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/login');
+      const returnUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : '/chat';
+      router.push('/auth/login?returnUrl=' + returnUrl);
       return;
     }
     fetchConversations();

@@ -76,7 +76,7 @@ export default function CheckoutPage() {
   const selectedInstallment = INSTALLMENTS_OPTIONS.find((o) => o.qty === installments) || INSTALLMENTS_OPTIONS[0];
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
+    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/checkout')); return; }
     fetchCart();
     fetchWallet();
     if (user) {

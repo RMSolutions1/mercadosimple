@@ -92,11 +92,17 @@ function RegisterForm() {
     e.preventDefault();
     if (!form.acceptTerms) { toast.error('Debés aceptar los términos y condiciones'); return; }
     if (form.password !== form.confirmPassword) { toast.error('Las contraseñas no coinciden'); return; }
-    if (form.password.length < 6) { toast.error('La contraseña debe tener al menos 6 caracteres'); return; }
+    if (form.password.length < 8) { toast.error('La contraseña debe tener al menos 8 caracteres'); return; }
     try {
       await register({ name: form.name, email: form.email, password: form.password, role: form.role });
-      toast.success('¡Bienvenido a Pago Simple!');
-      router.push('/pago-simple');
+      toast.success('¡Cuenta creada! Bienvenido.');
+      const returnUrl = searchParams.get('returnUrl');
+      if (returnUrl) {
+        router.push(decodeURIComponent(returnUrl));
+        return;
+      }
+      if (form.role === 'seller') router.push('/vendedor/dashboard');
+      else router.push('/mi-cuenta');
     } catch (error: any) {
       const msg = error.response?.data?.message;
       const text = Array.isArray(msg) ? msg[0] : msg;
