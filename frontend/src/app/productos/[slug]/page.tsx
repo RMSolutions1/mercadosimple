@@ -16,6 +16,7 @@ import { useCartStore } from '@/store/cart.store';
 import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { ProductStructuredData } from '@/components/seo/ProductStructuredData';
 
 const INSTALLMENTS = [
   { qty: 1, label: '1 pago', surcharge: 0 },
@@ -189,6 +190,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ProductStructuredData product={product} />
       {/* BREADCRUMB */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-2">

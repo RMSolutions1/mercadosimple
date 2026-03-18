@@ -9,10 +9,12 @@ primary_region = 'gru'
 [build]
   [build.args]
     NEXT_PUBLIC_API_URL = "https://mercadosimple-api.fly.dev/api"
+    NEXT_PUBLIC_SITE_URL = "https://mercadosimple-web.fly.dev"
 
 [env]
   NODE_ENV = 'production'
   NEXT_PUBLIC_API_URL = 'https://mercadosimple-api.fly.dev/api'
+  NEXT_PUBLIC_SITE_URL = 'https://mercadosimple-web.fly.dev'
 
 [http_service]
   internal_port = 3000
