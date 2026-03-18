@@ -77,8 +77,12 @@ function SellerDashboardContent() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || (user?.role !== 'seller' && user?.role !== 'admin')) {
+    if (!isAuthenticated) {
       router.push('/auth/login?returnUrl=' + encodeURIComponent('/vendedor/dashboard'));
+      return;
+    }
+    if (user?.role !== 'seller' && user?.role !== 'admin') {
+      router.push('/mi-cuenta');
       return;
     }
     fetchData();

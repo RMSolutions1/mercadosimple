@@ -47,6 +47,10 @@ Thumbs.db
 # ─── Testing ─────────────────────────────────────────────────
 coverage/
 .nyc_output/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/.playwright/
 
 # ─── TypeScript ──────────────────────────────────────────────
 *.tsbuildinfo
