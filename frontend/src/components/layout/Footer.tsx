@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Facebook, Instagram, Twitter, Youtube, Shield, Truck, CreditCard, Headphones, RotateCcw, ShieldCheck } from 'lucide-react';
 import { SolMayo } from '@/components/ui/SolMayo';
 
+/** Una sola grilla de navegación (evita la sensación de “doble footer” de ML con dos bloques iguales). */
 const FOOTER_COLS = [
   {
     title: 'Comprar',
@@ -20,7 +21,7 @@ const FOOTER_COLS = [
       { label: 'Panel vendedor',     href: '/vendedor/dashboard' },
       { label: 'Publicar producto',  href: '/vendedor/productos/nuevo' },
       { label: 'Comisiones',         href: '/comisiones' },
-      { label: 'Envíos',             href: '/envios-vendedor' },
+      { label: 'Envíos vendedor',    href: '/envios-vendedor' },
     ],
   },
   {
@@ -36,13 +37,26 @@ const FOOTER_COLS = [
     ],
   },
   {
-    title: 'Ayuda',
+    title: 'Ayuda y legal',
     links: [
       { label: 'Centro de ayuda',        href: '/ayuda' },
+      { label: 'Centro de seguridad',    href: '/proteccion-comprador' },
       { label: 'Términos y condiciones', href: '/terminos' },
       { label: 'Privacidad',             href: '/privacidad' },
       { label: 'Defensa del consumidor', href: '/defensa-consumidor' },
       { label: 'Contáctanos',            href: '/contacto' },
+    ],
+  },
+  {
+    title: 'Mercado Simple',
+    links: [
+      { label: 'Quiénes somos',        href: '/quienes-somos' },
+      { label: 'Blog',                 href: '/blog' },
+      { label: 'Trabaja con nosotros', href: '/trabaja-con-nosotros' },
+      { label: 'Inversores',           href: '/inversores' },
+      { label: 'Prensa',               href: '/prensa' },
+      { label: 'Sustentabilidad',      href: '/sustentabilidad' },
+      { label: 'Developers',           href: '/contacto' },
     ],
   },
 ];
@@ -52,53 +66,6 @@ const POPULAR_SEARCHES = [
   'Lavarropas', 'Aire acondicionado', 'Zapatillas Nike', 'PlayStation 5',
   'Auriculares Bluetooth', 'Freidora sin aceite', 'Reloj inteligente',
   'Tablet', 'Cámara de seguridad', 'Bicicleta',
-];
-
-const INFO_COLUMNS = [
-  {
-    title: 'Acerca de',
-    links: [
-      { label: 'Quiénes somos',        href: '/quienes-somos' },
-      { label: 'Blog',                 href: '/blog' },
-      { label: 'Trabaja con nosotros', href: '/trabaja-con-nosotros' },
-      { label: 'Inversores',           href: '/inversores' },
-      { label: 'Prensa',               href: '/prensa' },
-      { label: 'Sustentabilidad',      href: '/sustentabilidad' },
-    ],
-  },
-  {
-    title: 'Otros sitios',
-    links: [
-      { label: 'Pago Simple',             href: '/pago-simple' },
-      { label: 'Developers',              href: '/contacto' },
-      { label: 'Mercado Simple Envíos',   href: '/envios-vendedor' },
-    ],
-  },
-  {
-    title: 'Ayuda',
-    links: [
-      { label: 'Comprar',                  href: '/como-comprar' },
-      { label: 'Vender',                   href: '/empezar-a-vender' },
-      { label: 'Resolución de problemas',  href: '/ayuda' },
-      { label: 'Centro de seguridad',      href: '/proteccion-comprador' },
-    ],
-  },
-  {
-    title: 'Redes sociales',
-    links: [
-      { label: 'X / Twitter', href: '/contacto' },
-      { label: 'Facebook',    href: '/contacto' },
-      { label: 'Instagram',   href: '/contacto' },
-      { label: 'YouTube',     href: '/contacto' },
-    ],
-  },
-  {
-    title: 'Mi cuenta',
-    links: [
-      { label: 'Ingresá', href: '/auth/login' },
-      { label: 'Vender',  href: '/vendedor/productos/nuevo' },
-    ],
-  },
 ];
 
 const PAYMENT_BADGES = [
@@ -136,11 +103,11 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Main columns */}
+      {/* Main columns — una sola sección de enlaces */}
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
           {/* Brand column */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1">
+          <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <SolMayo size={30} />
               <div>
@@ -152,6 +119,11 @@ export function Footer() {
             </div>
             <p className="text-gray-500 text-xs leading-relaxed mb-4">
               La plataforma de e-commerce más confiable de Argentina. Comprá y vendé con total seguridad.
+            </p>
+            <p className="text-xs text-gray-500 mb-3">
+              <Link href="/auth/login" className="text-gray-400 hover:text-white transition-colors">Ingresá</Link>
+              <span className="text-gray-600 mx-2">·</span>
+              <Link href="/vendedor/productos/nuevo" className="text-gray-400 hover:text-white transition-colors">Publicá</Link>
             </p>
             <div className="flex items-center gap-3">
               <span className="text-gray-500 text-xs">Seguinos:</span>
@@ -209,29 +181,6 @@ export function Footer() {
                   <span className="text-gray-700 mx-1">|</span>
                 )}
               </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Más información */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <h4 className="text-xs text-gray-500 uppercase tracking-widest mb-4">Más información</h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {INFO_COLUMNS.map(col => (
-              <div key={col.title}>
-                <h5 className="text-xs font-semibold text-gray-300 mb-2">{col.title}</h5>
-                <ul className="space-y-1">
-                  {col.links.map(link => (
-                    <li key={link.label}>
-                      <Link href={link.href} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             ))}
           </div>
         </div>
