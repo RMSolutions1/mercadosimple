@@ -2,12 +2,14 @@
 export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { CheckCircle, CreditCard, Truck, Package, ChevronRight, Wallet, Zap } from 'lucide-react';
 import { useCartStore } from '@/store/cart.store';
 import { useAuthStore } from '@/store/auth.store';
+import { useAuthHydrationReady } from '@/hooks/useAuthHydrationReady';
 import { useWalletStore } from '@/store/wallet.store';
 import { formatPrice } from '@/lib/utils';
+import { hasValidClientSession } from '@/lib/auth-storage';
+import { ProtectedSessionGate } from '@/components/auth/ProtectedSessionGate';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -16,10 +18,10 @@ import { Order } from '@/types';
 const STEPS = ['Envío', 'Pago', 'Confirmación'];
 const PROVINCES = ['Buenos Aires', 'Córdoba', 'Santa Fe', 'Mendoza', 'Tucumán', 'Entre Ríos', 'Salta', 'Misiones', 'Corrientes', 'Chaco', 'Santiago del Estero', 'San Juan', 'Jujuy', 'Río Negro', 'Neuquén', 'Formosa', 'Chubut', 'San Luis', 'Catamarca', 'La Rioja', 'La Pampa', 'Santa Cruz', 'Tierra del Fuego', 'Ciudad de Buenos Aires'];
 
-export default function CheckoutPage() {
-  const router = useRouter();
+function CheckoutContent() {
   const { cart, fetchCart } = useCartStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { user } = useAuthStore();
+  const authReady = useAuthHydrationReady();
   const { wallet, fetchWallet } = useWalletStore();
   const [step, setStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +78,7 @@ export default function CheckoutPage() {
   const selectedInstallment = INSTALLMENTS_OPTIONS.find((o) => o.qty === installments) || INSTALLMENTS_OPTIONS[0];
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/checkout')); return; }
+    if (!authReady || !hasValidClientSession()) return;
     fetchCart();
     fetchWallet();
     if (user) {
@@ -89,7 +91,7 @@ export default function CheckoutPage() {
         phone: user.phone || '',
       }));
     }
-  }, [isAuthenticated, user?.id]);
+  }, [authReady, user?.id]);
 
   useEffect(() => {
     if (cart?.total && Number(cart.total) > 0) {
@@ -131,7 +133,15 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!isAuthenticated) return null;
+  if (!authReady) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-ms-blue border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!hasValidClientSession()) return null;
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -478,5 +488,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <ProtectedSessionGate returnPath="/checkout">
+      <CheckoutContent />
+    </ProtectedSessionGate>
   );
 }

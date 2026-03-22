@@ -89,6 +89,28 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      /**
+       * Si hay token pero isAuthenticated es false (persistencia vieja/corrupta), no rehidratar sesión.
+       * Evita que la UI quede “invitado” en navbar pero rutas con token crean sesión fantasma.
+       */
+      merge: (persistedState, currentState) => {
+        try {
+          const p = persistedState as Partial<AuthState> | undefined;
+          const cur = currentState as AuthState;
+          if (!p) return cur;
+          const token = p.accessToken ?? null;
+          const authOk = !!token && !!p.isAuthenticated;
+          return {
+            ...cur,
+            user: authOk ? (p.user ?? null) : null,
+            accessToken: authOk ? token : null,
+            refreshToken: authOk ? (p.refreshToken ?? null) : null,
+            isAuthenticated: authOk,
+          };
+        } catch {
+          return currentState as AuthState;
+        }
+      },
     },
   ),
 );

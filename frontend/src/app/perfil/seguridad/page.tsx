@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Shield, Lock, Eye, EyeOff, Smartphone, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
@@ -17,7 +17,13 @@ export default function SeguridadPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
-  if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/perfil/seguridad')); return null; }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/auth/login?returnUrl=' + encodeURIComponent('/perfil/seguridad'));
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) return null;
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();

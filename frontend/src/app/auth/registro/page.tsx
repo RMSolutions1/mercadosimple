@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, ShoppingCart, Store, CheckCircle, Shield, Zap, ChevronRight, CreditCard, Smartphone } from 'lucide-react';
@@ -71,6 +71,9 @@ function PasswordStrength({ password }: { password: string }) {
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const stepParam = searchParams.get('step');
+  /** Fuente única de verdad: evita desincronía con useSearchParams / remounts de Next.js */
+  const step = stepParam === '2' ? 2 : 1;
   const roleParam = searchParams.get('role');
   const defaultRole = roleParam === 'seller' ? 'seller' : 'buyer';
   const returnRaw = searchParams.get('returnUrl');
@@ -81,7 +84,21 @@ function RegisterForm() {
   const { register, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [step, setStep] = useState(1); // 1: role, 2: data
+
+  const step2Href = useMemo(() => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.set('step', '2');
+    return `/auth/registro?${p.toString()}`;
+  }, [searchParams]);
+
+  const goToStep1 = () => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete('step');
+    const q = p.toString();
+    if (typeof window !== 'undefined') {
+      window.location.assign(q ? `/auth/registro?${q}` : '/auth/registro');
+    }
+  };
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -263,11 +280,14 @@ function RegisterForm() {
                       );
                     })}
                   </div>
-                  <button onClick={() => setStep(2)}
+                  <Link
+                    href={step2Href}
+                    data-testid="registro-continuar"
                     className="w-full py-3.5 rounded-2xl font-bold text-white transition-all flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' }}>
+                    style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' }}
+                  >
                     Continuar <ChevronRight className="w-5 h-5" />
-                  </button>
+                  </Link>
                   <p className="text-center text-sm text-gray-500">
                     ¿Ya tenés cuenta?{' '}
                     <Link href={loginHref} className="font-semibold text-blue-600 hover:underline">Ingresá</Link>
@@ -280,7 +300,7 @@ function RegisterForm() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Selected role pill */}
                   <div className="flex items-center gap-2 mb-2">
-                    <button type="button" onClick={() => setStep(1)}
+                    <button type="button" onClick={goToStep1}
                       className="text-xs text-blue-600 hover:underline flex items-center gap-1">
                       ← Cambiar
                     </button>

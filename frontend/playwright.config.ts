@@ -13,6 +13,8 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Sesión aislada por test (evita Zustand persist de corridas manuales en el mismo perfil).
+    storageState: 'e2e/storage/empty.json',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer:

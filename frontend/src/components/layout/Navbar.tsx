@@ -55,7 +55,8 @@ const SolMayo = ({ size = 24 }: { size?: number }) => (
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, accessToken, isAuthenticated, logout } = useAuthStore();
+  const loggedIn = !!accessToken && isAuthenticated;
   const { cart, openCart } = useCartStore();
   const { wallet } = useWalletStore();
 
@@ -92,10 +93,10 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (loggedIn) {
       api.get('/notifications/unread-count').then((r) => setUnreadNotifs(r.data.count)).catch(() => {});
     }
-  }, [isAuthenticated]);
+  }, [loggedIn]);
 
   const loadNotifications = async () => {
     try {
@@ -104,11 +105,6 @@ export function Navbar() {
       setUnreadNotifs(0);
       await api.patch('/notifications/read-all').catch(() => {});
     } catch {}
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) router.push(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   const handleLogout = () => {
@@ -196,10 +192,13 @@ export function Navbar() {
             </div>
 
             {/* ===== BÚSQUEDA ===== */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
+            <form method="get" action="/buscar" className="flex-1 max-w-2xl" role="search">
               <div className="relative">
                 <input
-                  type="text"
+                  type="search"
+                  name="q"
+                  enterKeyHint="search"
+                  aria-label="Buscar en Mercado Simple"
                   placeholder="Buscá productos, marcas, vendedores..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -207,6 +206,7 @@ export function Navbar() {
                 />
                 <button
                   type="submit"
+                  aria-label="Buscar"
                   className="absolute right-1 top-1/2 -translate-y-1/2 bg-arg-sol hover:bg-arg-sol-dark text-white p-2 rounded-lg transition-colors shadow-sol"
                 >
                   <Search className="w-4 h-4" />
@@ -259,7 +259,7 @@ export function Navbar() {
 {/* Wallet icon removed — accessible via Mi cuenta / Pago Simple */}
 
               {/* NOTIFICACIONES */}
-              {isAuthenticated && (
+              {loggedIn && (
                 <div className="relative" ref={notifRef}>
                   <button
                     onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen) loadNotifications(); }}
@@ -301,7 +301,7 @@ export function Navbar() {
               )}
 
               {/* FAVORITOS */}
-              {isAuthenticated && (
+              {loggedIn && (
                 <Link href="/perfil/favoritos" className="flex flex-col items-center p-2 rounded-xl hover:bg-white/10 transition-colors hidden md:flex">
                   <Heart className="w-5 h-5" />
                   <span className="text-[9px] text-white/70 mt-0.5">Favoritos</span>
@@ -323,7 +323,7 @@ export function Navbar() {
               </button>
 
               {/* USUARIO */}
-              {isAuthenticated && user ? (
+              {loggedIn && user ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -503,7 +503,7 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="lg:hidden bg-white text-gray-900 border-t border-gray-100 shadow-xl">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-1.5">
-            {isAuthenticated && user ? (
+            {loggedIn && user ? (
               <>
                 {/* Perfil usuario */}
                 <div className="flex items-center gap-3 p-3 bg-arg-celeste-light rounded-2xl mb-3">

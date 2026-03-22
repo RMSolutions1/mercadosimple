@@ -11,9 +11,12 @@ import {
   Award, Zap, Shield, Home, Users, Link2, QrCode, Copy, CheckCircle, ExternalLink,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useAuthHydrationReady } from '@/hooks/useAuthHydrationReady';
 import { SolMayo } from '@/components/ui/SolMayo';
 import { Product } from '@/types';
 import { formatPrice, getStatusLabel, getStatusColor } from '@/lib/utils';
+import { hasValidClientSession } from '@/lib/auth-storage';
+import { ProtectedSessionGate } from '@/components/auth/ProtectedSessionGate';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
@@ -52,7 +55,8 @@ const MOCK_MONTHLY = [
 function SellerDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const authReady = useAuthHydrationReady();
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,16 +81,13 @@ function SellerDashboardContent() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login?returnUrl=' + encodeURIComponent('/vendedor/dashboard'));
-      return;
-    }
+    if (!authReady || !hasValidClientSession()) return;
     if (user?.role !== 'seller' && user?.role !== 'admin') {
       router.push('/mi-cuenta');
       return;
     }
     fetchData();
-  }, [isAuthenticated, user]);
+  }, [authReady, user, router]);
 
   useEffect(() => {
     if (activeTab === 'estadisticas' && !stats) fetchStats();
@@ -194,7 +195,15 @@ function SellerDashboardContent() {
   const topProducts = [...products].sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 5);
   const recentOrders = orders.slice(0, 5);
 
-  if (!isAuthenticated) return null;
+  if (!authReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!hasValidClientSession()) return null;
 
   return (
     <div className="min-h-screen flex" style={{ background: '#0F172A' }}>
@@ -946,9 +955,11 @@ function SellerDashboardContent() {
 
 export default function SellerDashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-8 h-8 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" /></div>}>
-      <SellerDashboardContent />
-    </Suspense>
+    <ProtectedSessionGate returnPath="/vendedor/dashboard">
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-8 h-8 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" /></div>}>
+        <SellerDashboardContent />
+      </Suspense>
+    </ProtectedSessionGate>
   );
 }
 

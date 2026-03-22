@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, type ReactNode } from 'react';
 
 export const dynamic = 'force-dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,9 +14,12 @@ import {
   FileText, AlertCircle, Store, DollarSign, Download, Share2, Clock, Loader2, Search,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useAuthHydrationReady } from '@/hooks/useAuthHydrationReady';
 import { useWalletStore } from '@/store/wallet.store';
 import { SolMayo } from '@/components/ui/SolMayo';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { hasValidClientSession } from '@/lib/auth-storage';
+import { ProtectedSessionGate } from '@/components/auth/ProtectedSessionGate';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
@@ -229,7 +232,8 @@ const SERVICES = [
 function MiCuentaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, user, logout, updateUser } = useAuthStore();
+  const { user, logout, updateUser } = useAuthStore();
+  const authReady = useAuthHydrationReady();
   const { wallet, transactions, fetchWallet, fetchTransactions, deposit, withdraw, transfer } = useWalletStore();
   const [mounted, setMounted] = useState(false);
 
@@ -514,10 +518,10 @@ function MiCuentaContent() {
   const [showPw, setShowPw] = useState({ current: false, new: false });
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/auth/login?returnUrl=' + encodeURIComponent('/mi-cuenta')); return; }
+    if (!authReady || !hasValidClientSession()) return;
     fetchWallet();
     fetchTransactions();
-  }, [isAuthenticated]);
+  }, [authReady]);
 
   useEffect(() => {
     if (user) setProfileForm({ name: user.name || '', phone: user.phone || '', address: user.address || '', city: user.city || '', province: user.province || '' });
@@ -665,13 +669,13 @@ function MiCuentaContent() {
   const txColor = (type: string) => ['deposit', 'transfer_in', 'refund', 'cashback'].includes(type) ? '#059669' : '#DC2626';
   const txSign = (type: string) => ['deposit', 'transfer_in', 'refund', 'cashback'].includes(type) ? '+' : '-';
 
-  if (!mounted) return (
+  if (!mounted || !authReady) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
       <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
-  if (!isAuthenticated) return null;
+  if (!hasValidClientSession()) return null;
 
   const NAV_GROUPS = [
     {
@@ -2783,8 +2787,10 @@ function ConfiguracionTab() {
 
 export default function MiCuentaPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}><div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}>
-      <MiCuentaContent />
-    </Suspense>
+    <ProtectedSessionGate returnPath="/mi-cuenta">
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}><div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}>
+        <MiCuentaContent />
+      </Suspense>
+    </ProtectedSessionGate>
   );
 }

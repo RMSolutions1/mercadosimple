@@ -43,7 +43,7 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       {/* Left: branding Pago Simple — estilo Mercado Pago / Ualá */}
-      <div className="lg:w-[48%] min-h-[40vh] lg:min-h-screen relative overflow-hidden flex flex-col justify-between p-8 lg:p-12"
+      <div className="lg:w-[48%] min-h-[40vh] lg:min-h-screen relative overflow-hidden flex flex-col justify-between p-8 lg:p-12 z-0"
         style={{ background: 'linear-gradient(160deg, #0F172A 0%, #1E3A8A 40%, #1E40AF 70%, #2563EB 100%)' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-400/20 blur-3xl" />
@@ -85,20 +85,20 @@ function LoginForm() {
           </div>
         </div>
 
-        <div className="relative z-10 hidden lg:block">
+        <div className="relative z-10 hidden lg:block pointer-events-none">
           <div className="relative w-full max-w-sm aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-white/5 backdrop-blur">
             <Image
               src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=600"
               alt="Billetera"
               fill
-              className="object-cover opacity-90"
+              className="object-cover opacity-90 pointer-events-none"
             />
           </div>
         </div>
       </div>
 
-      {/* Right: formulario */}
-      <div className="lg:w-[52%] min-h-screen flex flex-col items-center justify-center p-6 lg:p-12 bg-white">
+      {/* Right: formulario (z-index por encima del panel izquierdo en layouts apilados / tests E2E) */}
+      <div className="lg:w-[52%] min-h-screen flex flex-col items-center justify-center p-6 lg:p-12 bg-white relative z-30">
         <div className="w-full max-w-[400px]">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-black text-gray-900">Ingresar a Pago Simple</h2>

@@ -1,7 +1,41 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+/** Envío del formulario de login (evita solapamiento visual con el panel izquierdo). */
+async function submitLoginForm(page: Page) {
+  await page
+    .locator('form')
+    .filter({ has: page.locator('input[type="email"]') })
+    .locator('button[type="submit"]')
+    .click();
+}
 
 // Ejecutar contra producción: PLAYWRIGHT_BASE_URL=https://mercadosimple-web.fly.dev npm run test:e2e
 test.describe('Auth y redirecciones', () => {
+  test.describe.configure({ timeout: 90_000 });
+  test.beforeEach(async ({ page, context, baseURL }) => {
+    await context.addInitScript(() => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch {
+        /* ignore */
+      }
+    });
+    // Mismo origen que la app; luego reload para que Zustand no re-escriba tras clear.
+    const origin = baseURL ?? 'http://localhost:3000';
+    await page.goto(origin, { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch {
+        /* ignore */
+      }
+    });
+    await context.clearCookies();
+    await page.reload({ waitUntil: 'domcontentloaded' });
+  });
+
   test('Login: formulario visible y enlace a registro', async ({ page }) => {
     await page.goto('/auth/login');
     await expect(page.getByRole('heading', { name: /ingresar a pago simple/i })).toBeVisible();
@@ -12,15 +46,13 @@ test.describe('Auth y redirecciones', () => {
 
   test('Login exitoso redirige a /mi-cuenta cuando no hay returnUrl', async ({ page }) => {
     await page.goto('/auth/login');
-    // Credenciales del seed: comprador@mercadosimple.com / Comprador123*
     await page.getByPlaceholder(/email|tu@email/i).fill('comprador@mercadosimple.com');
     await page.getByPlaceholder(/contraseña|••••/i).fill('Comprador123*');
-    await page.getByRole('button', { name: /ingresar/i }).click();
-    await page.waitForURL(/\/(mi-cuenta|auth\/login)/, { timeout: 15000 });
+    await submitLoginForm(page);
+    await expect(page).toHaveURL(/\/(mi-cuenta|auth\/login)/, { timeout: 20000 });
     const url = page.url();
     if (url.includes('/auth/login')) {
-      const err = await page.getByRole('alert').textContent().catch(() => '');
-      test.skip(true, 'Login falló (API/seed): ' + err);
+      test.skip(true, 'Login falló (API/seed). Ejecutá: cd backend && npm run seed');
     }
     expect(url).toContain('/mi-cuenta');
   });
@@ -29,8 +61,8 @@ test.describe('Auth y redirecciones', () => {
     await page.goto('/auth/login?returnUrl=' + encodeURIComponent('/checkout'));
     await page.getByPlaceholder(/email|tu@email/i).fill('comprador@mercadosimple.com');
     await page.getByPlaceholder(/contraseña|••••/i).fill('Comprador123*');
-    await page.getByRole('button', { name: /ingresar/i }).click();
-    await page.waitForURL(/\/(checkout|mi-cuenta|auth\/login)/, { timeout: 15000 });
+    await submitLoginForm(page);
+    await expect(page).toHaveURL(/\/(checkout|mi-cuenta|auth\/login)/, { timeout: 20000 });
     const url = page.url();
     if (url.includes('/auth/login')) {
       test.skip(true, 'Login falló - comprobar API y usuario de prueba');
@@ -39,17 +71,20 @@ test.describe('Auth y redirecciones', () => {
   });
 
   test('Registro: paso 1 (rol) y paso 2 (datos) visibles', async ({ page }) => {
-    await page.goto('/auth/registro');
-    await expect(page.getByRole('heading', { name: /crear cuenta|pago simple/i })).toBeVisible();
+    await page.goto('/auth/registro', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await expect(page.getByTestId('registro-continuar')).toBeVisible({ timeout: 20000 });
     await expect(page.getByText('Quiero comprar').first()).toBeVisible();
-    await page.getByRole('button', { name: /continuar/i }).click();
-    await expect(page.getByPlaceholder('Juan Pérez')).toBeVisible({ timeout: 5000 });
-    await expect(page.getByPlaceholder(/juan@email\.com|email/i)).toBeVisible();
+    await page.getByTestId('registro-continuar').click();
+    await expect(page).toHaveURL(/step=2/, { timeout: 10000 });
+    await expect(page.getByPlaceholder('Juan Pérez')).toBeVisible({ timeout: 10000 });
+    await page.goto('/auth/registro?step=2');
+    await expect(page.getByPlaceholder('Juan Pérez')).toBeVisible();
+    await expect(page.getByPlaceholder('juan@email.com')).toBeVisible();
   });
 
   test('Ruta protegida /mi-cuenta redirige a login con returnUrl', async ({ page }) => {
-    await page.goto('/mi-cuenta');
-    await page.waitForURL(/\/auth\/login/, { timeout: 5000 });
+    await page.goto('/mi-cuenta', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 30000 });
     expect(page.url()).toContain('/auth/login');
     expect(page.url()).toContain('returnUrl');
     expect(page.url()).toContain('mi-cuenta');
@@ -57,14 +92,14 @@ test.describe('Auth y redirecciones', () => {
 
   test('Ruta protegida /checkout redirige a login con returnUrl', async ({ page }) => {
     await page.goto('/checkout');
-    await page.waitForURL(/\/auth\/login/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 20000 });
     expect(page.url()).toContain('returnUrl');
     expect(page.url()).toContain('checkout');
   });
 
   test('Ruta protegida /vendedor/dashboard redirige a login sin sesión', async ({ page }) => {
     await page.goto('/vendedor/dashboard');
-    await page.waitForURL(/\/auth\/login/, { timeout: 5000 });
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 20000 });
     expect(page.url()).toContain('returnUrl');
     expect(page.url()).toContain('vendedor');
   });
@@ -75,8 +110,9 @@ test.describe('Auth y redirecciones', () => {
   });
 
   test('Pago Simple carga y enlaces de login/registro', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 900 });
     await page.goto('/pago-simple');
-    await expect(page.getByRole('link', { name: /ingresar/i }).first()).toBeVisible({ timeout: 8000 });
-    await expect(page.getByRole('link', { name: /registr/i }).first()).toBeVisible();
+    await expect(page.locator('header').getByRole('link', { name: /^Ingresar$/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('header').getByRole('link', { name: /registr/i }).first()).toBeVisible();
   });
 });

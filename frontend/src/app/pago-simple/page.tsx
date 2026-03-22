@@ -11,8 +11,10 @@ import {
   Smartphone, Gift, Home, Heart,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useAuthHydrationReady } from '@/hooks/useAuthHydrationReady';
 import { SolMayo } from '@/components/ui/SolMayo';
 import api from '@/lib/axios';
+import { hasValidClientSession } from '@/lib/auth-storage';
 
 interface InstallmentPlan {
   qty: number;
@@ -93,7 +95,9 @@ const PAYMENT_LOGOS = [
 ];
 
 export default function PagoSimplePage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const authReady = useAuthHydrationReady();
+  const isLoggedIn = authReady && !!accessToken && hasValidClientSession();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [myLinks, setMyLinks] = useState<PaymentLink[]>([]);
@@ -110,10 +114,10 @@ export default function PagoSimplePage() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isLoggedIn) {
       api.get('/pago-simple/links?limit=5').then(({ data }) => setMyLinks(data.links || [])).catch(() => {});
     }
-  }, [isAuthenticated]);
+  }, [isLoggedIn]);
 
   const fetchInstallments = async (amount: number) => {
     try {
@@ -157,7 +161,7 @@ export default function PagoSimplePage() {
     setTimeout(() => setCopiedCode(''), 2000);
   };
 
-  if (!mounted) {
+  if (!mounted || !authReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -228,7 +232,7 @@ export default function PagoSimplePage() {
             </nav>
 
             <div className="hidden lg:flex items-center gap-3">
-              {isAuthenticated ? (
+              {isLoggedIn ? (
                 <>
                   <button
                     onClick={() => setShowCreateLink(true)}
@@ -268,7 +272,7 @@ export default function PagoSimplePage() {
               <Link href="/pago-simple#calculadora" className="block px-4 py-2 text-gray-600" onClick={() => setMobileMenuOpen(false)}>Tarifas / Cuotas</Link>
               <Link href="/ayuda" className="block px-4 py-2 text-gray-600" onClick={() => setMobileMenuOpen(false)}>Ayuda</Link>
               <div className="pt-2 flex gap-2">
-                {isAuthenticated ? (
+                {isLoggedIn ? (
                   <>
                     <button onClick={() => { setShowCreateLink(true); setMobileMenuOpen(false); }} className="flex-1 py-2.5 rounded-xl font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>Crear link</button>
                     <Link href="/mi-cuenta?tab=billetera" className="flex-1 py-2.5 rounded-xl border border-gray-200 text-center font-medium" onClick={() => setMobileMenuOpen(false)}>Mi cuenta</Link>
@@ -309,7 +313,7 @@ export default function PagoSimplePage() {
                   Cobrá con links, QR y cuotas. Pagá con tu billetera, servicios y más. Sin hardware, sin banco, sin burocracia.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  {isAuthenticated ? (
+                  {isLoggedIn ? (
                     <button onClick={() => setShowCreateLink(true)} className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-lg transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                       <Plus className="w-5 h-5" /> Crear Link de Cobro
                     </button>
@@ -376,7 +380,7 @@ export default function PagoSimplePage() {
         </section>
 
         {/* ========== MIS LINKS (si está logueado) ========== */}
-        {isAuthenticated && myLinks.length > 0 && (
+        {isLoggedIn && myLinks.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 py-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Mis últimos links</h2>
@@ -554,7 +558,7 @@ export default function PagoSimplePage() {
             <h2 className="text-3xl font-black text-white mb-4">Empezá a cobrar hoy mismo</h2>
             <p className="text-gray-400 mb-8">Sin contrato. Sin costos de activación. Solo 3.5% por transacción exitosa.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {isAuthenticated ? (
+              {isLoggedIn ? (
                 <>
                   <button onClick={() => setShowCreateLink(true)} className="px-8 py-4 rounded-2xl font-bold text-white text-lg" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>Crear Link de Cobro</button>
                   <Link href="/mi-cuenta?tab=billetera" className="px-8 py-4 rounded-2xl font-bold border border-white/20 text-white text-lg hover:bg-white/10 transition-all">Ver mi Billetera</Link>
