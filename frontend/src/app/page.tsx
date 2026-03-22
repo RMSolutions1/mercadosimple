@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {
   ChevronRight, Zap, Shield, Truck, Star, TrendingUp, ArrowRight,
   ChevronLeft, Percent, Tag, Clock, Gift, Award, CreditCard, Headphones,
+  MapPin, LogIn, Wallet, ShieldCheck, BadgeDollarSign, X,
 } from 'lucide-react';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Product, Category } from '@/types';
@@ -146,6 +147,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showCpModal, setShowCpModal] = useState(false);
+  const [cpInput, setCpInput] = useState('');
 
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 0);
@@ -231,6 +234,86 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* TARJETAS DE ACCESO RÁPIDO */}
+      <section className="max-w-7xl mx-auto px-4 py-5">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+          <Link
+            href="/productos?freeShipping=true"
+            className="flex-shrink-0 w-56 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+          >
+            <Truck className="w-7 h-7 text-ms-blue mb-2 group-hover:scale-110 transition-transform" />
+            <p className="font-semibold text-gray-900 text-sm">Envío gratis</p>
+            <p className="text-gray-500 text-xs mt-0.5">Beneficio en miles de productos</p>
+          </Link>
+
+          <Link
+            href="/auth/login"
+            className="flex-shrink-0 w-56 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+          >
+            <LogIn className="w-7 h-7 text-ms-blue mb-2 group-hover:scale-110 transition-transform" />
+            <p className="font-semibold text-gray-900 text-sm">Ingresá a tu cuenta</p>
+            <p className="text-gray-500 text-xs mt-0.5">Disfrutá de ofertas y comprá sin límites</p>
+          </Link>
+
+          <button
+            onClick={() => setShowCpModal(true)}
+            className="flex-shrink-0 w-56 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all group text-left"
+          >
+            <MapPin className="w-7 h-7 text-ms-blue mb-2 group-hover:scale-110 transition-transform" />
+            <p className="font-semibold text-gray-900 text-sm">Ingresá tu ubicación</p>
+            <p className="text-gray-500 text-xs mt-0.5">Consultá costos y tiempos de entrega</p>
+          </button>
+
+          <Link
+            href="/como-pagar"
+            className="flex-shrink-0 w-56 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+          >
+            <CreditCard className="w-7 h-7 text-ms-blue mb-2 group-hover:scale-110 transition-transform" />
+            <p className="font-semibold text-gray-900 text-sm">Medios de pago</p>
+            <p className="text-gray-500 text-xs mt-0.5">Pagá tus compras de forma rápida y segura</p>
+          </Link>
+
+          <Link
+            href="/buscar?q=&priceMax=20000"
+            className="flex-shrink-0 w-56 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+          >
+            <BadgeDollarSign className="w-7 h-7 text-ms-blue mb-2 group-hover:scale-110 transition-transform" />
+            <p className="font-semibold text-gray-900 text-sm">Menos de $20.000</p>
+            <p className="text-gray-500 text-xs mt-0.5">Descubrí productos con precios bajos</p>
+          </Link>
+        </div>
+      </section>
+
+      {/* MODAL CÓDIGO POSTAL */}
+      {showCpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowCpModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowCpModal(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+              <X className="w-5 h-5" />
+            </button>
+            <MapPin className="w-10 h-10 text-ms-blue mb-3" />
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Ingresá tu código postal</h3>
+            <p className="text-gray-500 text-sm mb-4">Conocé los costos y tiempos de entrega.</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={cpInput}
+                onChange={(e) => setCpInput(e.target.value)}
+                placeholder="Ej: 1425"
+                maxLength={8}
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ms-blue focus:border-transparent"
+              />
+              <button
+                onClick={() => setShowCpModal(false)}
+                className="bg-ms-blue text-white font-semibold px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+              >
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* OFERTAS DEL DÍA */}
       <section className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
@@ -296,6 +379,41 @@ export default function HomePage() {
               Crear cuenta gratis
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ELEGÍ CÓMO PAGAR */}
+      <section className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-1">Elegí cómo pagar</h2>
+          <p className="text-gray-500 text-sm mb-5">Podés pagar con tarjeta, débito, efectivo o con Pago Simple</p>
+          <div className="flex flex-wrap items-center gap-4 mb-5">
+            {[
+              { name: 'Visa', bg: 'bg-[#1A1F71]', text: 'text-white', label: 'VISA' },
+              { name: 'Mastercard', bg: 'bg-[#EB001B]', text: 'text-white', label: 'MC' },
+              { name: 'Amex', bg: 'bg-[#006FCF]', text: 'text-white', label: 'AMEX' },
+              { name: 'Naranja', bg: 'bg-[#FF6600]', text: 'text-white', label: 'NX' },
+              { name: 'Cabal', bg: 'bg-[#00529B]', text: 'text-white', label: 'CABAL' },
+            ].map((card) => (
+              <div
+                key={card.name}
+                className={`${card.bg} ${card.text} rounded-lg px-4 py-2 text-xs font-bold shadow-sm`}
+                title={card.name}
+              >
+                {card.label}
+              </div>
+            ))}
+            <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg px-4 py-2 shadow-sm">
+              <Wallet className="w-4 h-4" />
+              <span className="text-xs font-bold">Pago Simple</span>
+            </div>
+          </div>
+          <Link
+            href="/como-pagar"
+            className="inline-flex items-center gap-1.5 text-ms-blue font-semibold text-sm hover:underline"
+          >
+            Conocé todos los medios de pago <ChevronRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
@@ -376,6 +494,37 @@ export default function HomePage() {
               <img src={brand.logo} alt={brand.name} className="max-h-8 max-w-full object-contain grayscale hover:grayscale-0 transition-all" />
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* SEGURIDAD */}
+      <section className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+              <ShieldCheck className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">Seguridad, de principio a fin</h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-4">
+              ¿No te gusta? ¡Devolvelo! En Mercado Simple no hay nada que no puedas hacer, porque estás siempre protegido.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/proteccion-comprador"
+                className="inline-flex items-center gap-2 bg-ms-blue text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-blue-700 transition"
+              >
+                <Shield className="w-4 h-4" /> Cómo te protegemos
+              </Link>
+              <Link
+                href="/devoluciones"
+                className="text-gray-500 text-xs hover:text-ms-blue hover:underline transition"
+              >
+                Botón de arrepentimiento y baja de servicio
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

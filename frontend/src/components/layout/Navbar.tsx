@@ -66,6 +66,10 @@ export function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [postalCode, setPostalCode] = useState('');
+  const [cpOpen, setCpOpen] = useState(false);
+  const [cpInput, setCpInput] = useState('');
+  const cpRef = useRef<HTMLDivElement>(null);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -76,9 +80,15 @@ export function Navbar() {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setUserMenuOpen(false);
       if (megaMenuRef.current && !megaMenuRef.current.contains(e.target as Node)) setMegaMenuOpen(false);
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+      if (cpRef.current && !cpRef.current.contains(e.target as Node)) setCpOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('ms_postal_code');
+    if (saved) setPostalCode(saved);
   }, []);
 
   useEffect(() => {
@@ -98,7 +108,7 @@ export function Navbar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) router.push(`/productos?search=${encodeURIComponent(searchQuery.trim())}`);
+    if (searchQuery.trim()) router.push(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   const handleLogout = () => {
@@ -203,6 +213,45 @@ export function Navbar() {
                 </button>
               </div>
             </form>
+
+            {/* ===== UBICACIÓN ===== */}
+            <div className="relative hidden lg:block" ref={cpRef}>
+              <button
+                onClick={() => setCpOpen(!cpOpen)}
+                className="flex flex-col items-center p-2 rounded-xl hover:bg-white/10 transition-colors text-white/80 hover:text-white"
+              >
+                <MapPin className="w-5 h-5" />
+                <span className="text-[9px] mt-0.5 whitespace-nowrap">
+                  {postalCode ? `Enviar a ${postalCode}` : 'Enviar a...'}
+                </span>
+              </button>
+              {cpOpen && (
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 z-50 w-64">
+                  <p className="text-sm font-bold text-gray-900 mb-2">Ingresá tu código postal</p>
+                  <p className="text-xs text-gray-500 mb-3">Conocé los costos y tiempos de entrega.</p>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (cpInput.trim()) {
+                      setPostalCode(cpInput.trim());
+                      localStorage.setItem('ms_postal_code', cpInput.trim());
+                      setCpOpen(false);
+                    }
+                  }} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cpInput}
+                      onChange={(e) => setCpInput(e.target.value)}
+                      placeholder="Ej: 1425"
+                      maxLength={8}
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button type="submit" className="bg-ms-blue text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+                      OK
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
 
             {/* ===== ACCIONES DERECHA ===== */}
             <div className="flex items-center gap-0.5">

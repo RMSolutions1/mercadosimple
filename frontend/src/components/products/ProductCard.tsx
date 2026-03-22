@@ -111,7 +111,24 @@ export function ProductCard({ product, initialFavorite = false, showDiscount = f
               <p className="text-xs text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
             )}
             <p className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</p>
-            {product.seller && <p className="text-xs text-gray-500 mt-1 truncate">{product.seller.name}</p>}
+            {product.price >= 5000 && (
+              <p className="text-xs text-green-600 font-medium">
+                en 12x {formatPrice(Math.ceil(product.price / 12))} sin interés
+              </p>
+            )}
+            {product.freeShipping && (
+              <p className="text-xs text-green-600 font-semibold flex items-center gap-1 mt-0.5">
+                <Truck className="w-3 h-3" /> Envío gratis
+              </p>
+            )}
+            {product.seller && (
+              <div className="flex items-center gap-1 mt-1">
+                <p className="text-xs text-gray-500 truncate">{product.seller.name}</p>
+                {(product.seller as any).totalSales > 1000 && (
+                  <span className="text-[9px] bg-yellow-100 text-yellow-700 font-bold px-1 py-0.5 rounded">LÍDER</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Add to cart */}

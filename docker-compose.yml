@@ -3,7 +3,8 @@ version: '3.9'
 services:
   # ── Base de datos PostgreSQL ─────────────────────────────────────────────
   postgres:
-    image: postgres:16-alpine
+    # Usar 15 si el volumen ya existía con PG15; con volumen nuevo puedes volver a 16-alpine
+    image: postgres:15-alpine
     container_name: ms_postgres
     restart: unless-stopped
     environment:

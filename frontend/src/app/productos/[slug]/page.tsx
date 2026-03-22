@@ -248,7 +248,13 @@ export default function ProductDetailPage() {
                 </div>
               )}
               {/* Compartir */}
-              <button className="flex items-center gap-2 text-ms-blue text-sm mt-3 hover:underline">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success('Enlace copiado al portapapeles');
+                }}
+                className="flex items-center gap-2 text-ms-blue text-sm mt-3 hover:underline"
+              >
                 <Share2 className="w-4 h-4" /> Compartir
               </button>
             </div>
@@ -333,10 +339,13 @@ export default function ProductDetailPage() {
               {/* Stock */}
               {product.stock !== undefined && (
                 <div className="mb-4">
-                  {product.stock > 0 ? (
-                    <p className="text-sm text-gray-600">
-                      Stock disponible
-                      {product.stock <= 10 && <span className="text-orange-600 font-semibold ml-1">— ¡Solo quedan {product.stock}!</span>}
+                  {product.stock > 5 ? (
+                    <p className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" /> Stock disponible
+                    </p>
+                  ) : product.stock > 0 ? (
+                    <p className="text-sm font-semibold text-orange-600 flex items-center gap-1">
+                      <Clock className="w-4 h-4" /> ¡Últimas {product.stock} unidades!
                     </p>
                   ) : (
                     <p className="text-red-600 font-semibold text-sm flex items-center gap-1">
@@ -463,7 +472,14 @@ export default function ProductDetailPage() {
             {/* VENDEDOR */}
             {seller && (
               <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                <h3 className="font-bold text-gray-900 mb-3">Vendedor</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-gray-900">Vendedor</h3>
+                  {Number(seller.totalSales || 0) > 1000 && (
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200 flex items-center gap-1">
+                      <Award className="w-3 h-3" /> Vendedor Líder
+                    </span>
+                  )}
+                </div>
                 <Link href={`/vendedor/${seller.id}`} className="flex items-center gap-3 group mb-3">
                   <div className="w-10 h-10 rounded-full bg-ms-blue flex items-center justify-center text-white font-bold">
                     {seller.name?.charAt(0).toUpperCase()}
@@ -472,7 +488,9 @@ export default function ProductDetailPage() {
                     <p className="font-semibold text-gray-900 group-hover:text-ms-blue transition">{seller.name}</p>
                     <div className="flex items-center gap-1">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="text-xs text-gray-600">{Number(seller.reputation || 4.5).toFixed(1)}</span>
+                      <span className="text-xs text-gray-600">
+                        {Number(seller.reputation || 4.5).toFixed(1)} · {seller.city || 'Argentina'}
+                      </span>
                     </div>
                   </div>
                   <ExternalLink className="w-4 h-4 text-gray-400 ml-auto group-hover:text-ms-blue" />
