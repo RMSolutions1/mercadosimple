@@ -8,11 +8,16 @@ import Image from 'next/image';
 import { Eye, EyeOff, LogIn, Shield, Zap, CreditCard, Smartphone } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useCartStore } from '@/store/cart.store';
+import { safeReturnUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const returnRaw = searchParams.get('returnUrl');
+  const registroQuery = new URLSearchParams();
+  if (safeReturnUrl(returnRaw)) registroQuery.set('returnUrl', returnRaw!);
+  const registroHref = registroQuery.toString() ? `/auth/registro?${registroQuery.toString()}` : '/auth/registro';
   const { login, isLoading } = useAuthStore();
   const { fetchCart } = useCartStore();
   const [showPassword, setShowPassword] = useState(false);
@@ -24,9 +29,9 @@ function LoginForm() {
       const user = await login(form.email, form.password);
       await fetchCart();
       toast.success('¡Bienvenido!');
-      const returnUrl = searchParams.get('returnUrl');
-      if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl));
+      const next = safeReturnUrl(searchParams.get('returnUrl'));
+      if (next) {
+        router.push(next);
         return;
       }
       router.push('/mi-cuenta');
@@ -158,7 +163,7 @@ function LoginForm() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             ¿No tenés cuenta?{' '}
-            <Link href="/auth/registro" className="font-semibold text-blue-600 hover:underline">
+            <Link href={registroHref} className="font-semibold text-blue-600 hover:underline">
               Crear cuenta gratis
             </Link>
           </p>

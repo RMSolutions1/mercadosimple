@@ -4,6 +4,22 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
+/**
+ * Evita redirecciones abiertas: solo rutas relativas internas (mismo sitio).
+ * Uso: después del login/registro con ?returnUrl=...
+ */
+export function safeReturnUrl(raw: string | null | undefined): string | null {
+  if (raw == null || raw === '') return null;
+  let path = raw.trim();
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    path = raw.trim();
+  }
+  if (path.startsWith('/') && !path.startsWith('//')) return path;
+  return null;
+}
+
 export function formatPrice(price: number | string | undefined | null): string {
   const n = Number(price ?? 0);
   return new Intl.NumberFormat('es-AR', {

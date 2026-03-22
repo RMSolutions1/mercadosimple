@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, ShoppingCart, Store, CheckCircle, Shield, Zap, ChevronRight, CreditCard, Smartphone } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { safeReturnUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 const ROLE_OPTIONS = [
@@ -70,7 +71,13 @@ function PasswordStrength({ password }: { password: string }) {
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultRole = searchParams.get('role') || 'buyer';
+  const roleParam = searchParams.get('role');
+  const defaultRole = roleParam === 'seller' ? 'seller' : 'buyer';
+  const returnRaw = searchParams.get('returnUrl');
+  const loginQuery = new URLSearchParams();
+  if (safeReturnUrl(returnRaw) && returnRaw) loginQuery.set('returnUrl', returnRaw);
+  if (roleParam === 'seller' || roleParam === 'buyer') loginQuery.set('role', roleParam);
+  const loginHref = loginQuery.toString() ? `/auth/login?${loginQuery.toString()}` : '/auth/login';
   const { register, isLoading } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -94,11 +101,17 @@ function RegisterForm() {
     if (form.password !== form.confirmPassword) { toast.error('Las contraseñas no coinciden'); return; }
     if (form.password.length < 8) { toast.error('La contraseña debe tener al menos 8 caracteres'); return; }
     try {
-      await register({ name: form.name, email: form.email, password: form.password, role: form.role });
+      await register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+        ...(form.phone.trim() ? { phone: form.phone.trim() } : {}),
+      });
       toast.success('¡Cuenta creada! Bienvenido.');
-      const returnUrl = searchParams.get('returnUrl');
-      if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl));
+      const next = safeReturnUrl(searchParams.get('returnUrl'));
+      if (next) {
+        router.push(next);
         return;
       }
       if (form.role === 'seller') router.push('/vendedor/dashboard');
@@ -257,7 +270,7 @@ function RegisterForm() {
                   </button>
                   <p className="text-center text-sm text-gray-500">
                     ¿Ya tenés cuenta?{' '}
-                    <Link href="/auth/login" className="font-semibold text-blue-600 hover:underline">Ingresá</Link>
+                    <Link href={loginHref} className="font-semibold text-blue-600 hover:underline">Ingresá</Link>
                   </p>
                 </div>
               )}
@@ -370,7 +383,7 @@ function RegisterForm() {
 
                   <p className="text-center text-sm text-gray-500">
                     ¿Ya tenés cuenta?{' '}
-                    <Link href="/auth/login" className="font-semibold text-blue-600 hover:underline">Ingresá</Link>
+                    <Link href={loginHref} className="font-semibold text-blue-600 hover:underline">Ingresá</Link>
                   </p>
                 </form>
               )}
