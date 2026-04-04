@@ -1,3 +1,8 @@
+/**
+ * Vacía todas las tablas y deja solo administrador + categorías.
+ * Uso (solo entornos controlados):
+ *   CONFIRM_RESET=YES npm run db:reset-platform
+ */
 import { NestFactory } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -35,17 +40,9 @@ const ALL_ENTITIES = [
 
 function typeOrmConfig() {
   const databaseUrl = process.env.DATABASE_URL;
-  const base = {
-    entities: ALL_ENTITIES,
-    synchronize: true,
-  };
+  const base = { entities: ALL_ENTITIES, synchronize: true };
   if (databaseUrl) {
-    return {
-      type: 'postgres' as const,
-      url: databaseUrl,
-      ssl: { rejectUnauthorized: false },
-      ...base,
-    };
+    return { type: 'postgres' as const, url: databaseUrl, ssl: { rejectUnauthorized: false }, ...base };
   }
   return {
     type: 'postgres' as const,
@@ -68,19 +65,20 @@ function typeOrmConfig() {
   ],
   providers: [SeedService],
 })
-class SeedModule {}
+class ResetModule {}
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(SeedModule, {
-    logger: ['error', 'warn', 'log'],
-  });
+  if (process.env.CONFIRM_RESET !== 'YES') {
+    console.error('Abortado: definí CONFIRM_RESET=YES para ejecutar el reinicio total.');
+    process.exit(1);
+  }
+  const app = await NestFactory.createApplicationContext(ResetModule, { logger: ['error', 'warn', 'log'] });
   const seedService = app.get(SeedService);
-
   try {
-    await seedService.run();
-    console.log('\n✅ Seeds ejecutados correctamente');
-  } catch (error: any) {
-    console.error('\n❌ Error al ejecutar seeds:', error?.message || error);
+    await seedService.resetPlatformAndBootstrap('ELIMINAR_TODO_Y_REINICIAR');
+    console.log('\n✅ Plataforma reiniciada (admin + categorías).');
+  } catch (e: any) {
+    console.error('\n❌ Error:', e?.message || e);
     process.exit(1);
   } finally {
     await app.close();

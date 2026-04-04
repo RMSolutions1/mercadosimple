@@ -40,27 +40,45 @@ fly secrets set JWT_SECRET="..." JWT_REFRESH_SECRET="..." -a mercadosimple-api
 
 ## Checklist de producción
 
-### 1. Base de datos en Fly (seed)
+### 1. Base de datos en Fly (bootstrap)
 
-La base Postgres Managed en Fly suele estar vacía tras el primer deploy. Para cargar datos de prueba (usuarios, categorías, productos):
+El seed **no** crea usuarios de demo: solo el **administrador dueño** (`ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD`) y las **categorías** para que vendedores publiquen. Compradores y vendedores se crean con **registro** (`POST /api/auth/register`).
 
-1. Iniciar sesión como **admin** en el frontend (o crear un usuario y asignarle rol admin en la DB).
-2. Llamar al endpoint protegido (con JWT de admin):
+Configurá en Fly (recomendado):
+
+```bash
+fly secrets set ADMIN_SEED_EMAIL="tu@dominio.com" ADMIN_SEED_PASSWORD="clave-muy-segura" -a mercadosimple-api
+```
+
+**Primera carga** (DB vacía o sin admin): con `ALLOW_SYNC=true` o migraciones ya aplicadas, ejecutá el bootstrap una vez. Opciones:
+
+- **Desde tu PC** contra la DB (túnel o `DATABASE_URL`):
+
+```bash
+cd backend && npm run seed
+```
+
+- **Con JWT de admin** (si ya podés loguear como admin):
 
 ```bash
 curl -X POST https://mercadosimple-api.fly.dev/api/admin/seed \
   -H "Authorization: Bearer TU_JWT_ADMIN"
 ```
 
-- Respuesta: `{ "ok": true, "message": "Seed ejecutado correctamente. Revisar logs del servidor para credenciales de prueba." }`
-- Las credenciales de los usuarios de prueba se imprimen en los **logs del backend** en Fly. Ver: `fly logs -a mercadosimple-api`.
-
-Alternativa local con túnel a la DB de Fly:
+**Reinicio total** (borra **todo**: usuarios, productos, órdenes, etc. y vuelve a dejar solo admin + categorías). Solo en entornos controlados:
 
 ```bash
-fly proxy 15432 -a mercadosimple-db
-# En otra terminal, con DATABASE_URL o DB_* apuntando a localhost:15432:
-cd backend && npm run seed
+curl -X POST https://mercadosimple-api.fly.dev/api/admin/reset-platform \
+  -H "Authorization: Bearer TU_JWT_ADMIN" \
+  -H "Content-Type: application/json" \
+  -d "{\"confirm\":\"ELIMINAR_TODO_Y_REINICIAR\"}"
+```
+
+Local (requiere `CONFIRM_RESET=YES`):
+
+```bash
+# Windows PowerShell:
+$env:CONFIRM_RESET="YES"; npm run db:reset-platform
 ```
 
 ### 2. Secrets fuertes en Fly (API)

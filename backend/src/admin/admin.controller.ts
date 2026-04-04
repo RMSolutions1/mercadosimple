@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString, IsBoolean, Min, Max } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, IsBoolean, Min, Max, Equals } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AdminService } from './admin.service';
 import { SeedService } from '../database/seeds/seed.service';
@@ -69,6 +69,12 @@ class UpdateOrderStatusDto {
   adminNote?: string;
 }
 
+/** Reinicio total: TRUNCATE de todas las tablas de negocio y bootstrap de admin + categorías. */
+class ResetPlatformDto {
+  @Equals('ELIMINAR_TODO_Y_REINICIAR')
+  confirm: string;
+}
+
 @ApiTags('Admin')
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -81,12 +87,29 @@ export class AdminController {
   ) {}
 
   @Post('seed')
-  @ApiOperation({ summary: 'Ejecutar seed de la base de datos (solo producción/entorno controlado)' })
+  @ApiOperation({
+    summary: 'Bootstrap: administrador único + categorías (sin usuarios ni productos de demo)',
+  })
   async runSeed() {
     await this.seedService.run();
     return {
       ok: true,
-      message: 'Seed ejecutado correctamente. Revisar logs del servidor para credenciales de prueba.',
+      message:
+        'Bootstrap aplicado: dueño (ADMIN_SEED_EMAIL) y categorías. Vendedores y compradores se registran vía /auth/register.',
+    };
+  }
+
+  @Post('reset-platform')
+  @ApiOperation({
+    summary:
+      'PELIGRO: vacía todas las tablas y reinicia solo admin + categorías. Body: { "confirm": "ELIMINAR_TODO_Y_REINICIAR" }',
+  })
+  async resetPlatform(@Body() dto: ResetPlatformDto) {
+    await this.seedService.resetPlatformAndBootstrap(dto.confirm);
+    return {
+      ok: true,
+      message:
+        'Plataforma reiniciada. Solo existe el administrador (ADMIN_SEED_*) y las categorías. Registrá de nuevo vendedores y compradores.',
     };
   }
 

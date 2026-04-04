@@ -17,6 +17,7 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { IsString } from 'class-validator';
 import { EmailService } from '../email/email.service';
+import { WalletService } from '../wallet/wallet.service';
 
 export class RefreshTokenDto {
   @IsString()
@@ -31,6 +32,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
+    private walletService: WalletService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -38,7 +40,7 @@ export class AuthService {
       where: { email: registerDto.email },
     });
     if (existingUser) {
-      throw new ConflictException('El email ya est? registrado');
+      throw new ConflictException('El email ya está registrado');
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 12);
@@ -49,6 +51,7 @@ export class AuthService {
     });
 
     const savedUser = await this.userRepository.save(user);
+    await this.walletService.getOrCreateWallet(savedUser.id);
     const tokens = this.generateTokens(savedUser);
 
     // Enviar email de bienvenida (no bloquea la respuesta)
@@ -66,7 +69,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Credenciales inv?lidas');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     if (!user.isActive) {
@@ -75,7 +78,7 @@ export class AuthService {
 
     const passwordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!passwordValid) {
-      throw new UnauthorizedException('Credenciales inv?lidas');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const tokens = this.generateTokens(user);
@@ -89,7 +92,7 @@ export class AuthService {
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.userRepository.findOne({ where: { email: dto.email } });
     if (!user) {
-      return { message: 'Si el email existe, recibir?s las instrucciones de recuperaci?n' };
+      return { message: 'Si el email existe, recibirás las instrucciones de recuperación' };
     }
 
     const token = uuidv4();
@@ -101,12 +104,12 @@ export class AuthService {
       resetPasswordExpires: expires,
     });
 
-    // Enviar email real con el enlace de recuperaci?n
+    // Enviar email real con el enlace de recuperación
     await this.emailService.sendPasswordReset(user.email, user.name, token).catch(() => {});
 
     const isDev = process.env.NODE_ENV !== 'production';
     return {
-      message: 'Si el email existe, recibir?s las instrucciones de recuperaci?n',
+      message: 'Si el email existe, recibirás las instrucciones de recuperación',
       ...(isDev && { resetToken: token }),
     };
   }
@@ -117,7 +120,7 @@ export class AuthService {
     });
 
     if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-      throw new BadRequestException('Token inv?lido o expirado');
+      throw new BadRequestException('Token inválido o expirado');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
@@ -127,7 +130,7 @@ export class AuthService {
       resetPasswordExpires: null,
     });
 
-    return { message: 'Contrase?a actualizada correctamente' };
+    return { message: 'Contraseña actualizada correctamente' };
   }
 
   async getProfile(userId: string) {
@@ -143,12 +146,12 @@ export class AuthService {
       });
       const user = await this.userRepository.findOne({ where: { id: payload.sub } });
       if (!user || !user.isActive) {
-        throw new UnauthorizedException('Refresh token inv?lido');
+        throw new UnauthorizedException('Refresh token inválido');
       }
       const tokens = this.generateTokens(user);
       return { user: this.sanitizeUser(user), ...tokens };
     } catch {
-      throw new UnauthorizedException('Refresh token inv?lido o expirado');
+      throw new UnauthorizedException('Refresh token inválido o expirado');
     }
   }
 

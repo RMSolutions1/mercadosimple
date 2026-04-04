@@ -7,52 +7,33 @@
 
 ---
 
-## 📋 CREDENCIALES DE ACCESO
+## 📋 CREDENCIALES Y FLUJO (marketplace real)
 
-### 🔐 Administrador
+### 🔐 Administrador (dueño — único usuario del seed)
+
 | Campo | Valor |
 |-------|-------|
-| Email | `admin@mercadosimple.com` |
-| Contraseña | `Admin123*` |
-| Acceso | Panel Admin + Todo el sistema |
-| Saldo Pago Simple | $100.000 |
+| Email | `ADMIN_SEED_EMAIL` (por defecto `admin@mercadosimple.com`) |
+| Contraseña | `ADMIN_SEED_PASSWORD` (ver `backend/.env.example`) |
+| Acceso | Panel Admin, métricas, `POST /api/admin/seed`, reinicio total |
+
+Tras `npm run seed` **no** hay vendedores ni compradores de demo: hay que **registrarlos**.
+
+### 🏪 Vendedor
+1. Ir a `/auth/registro?role=seller` (o elegir “Quiero vender”).
+2. Completar registro → login → `/vendedor/dashboard` → **Publicar producto** (`POST /api/products`).
+
+### 👤 Comprador
+1. Registro en `/auth/registro` como comprador.
+2. Navegar catálogo, agregar al carrito, **checkout** (`POST /api/orders`).
 
 ---
 
-### 🏪 Vendedores (5 tiendas activas)
+## 📦 CATÁLOGO
 
-| Tienda | Email | Contraseña | Ciudad | Productos |
-|--------|-------|------------|--------|-----------|
-| **TechStore Argentina** | `techstore@mercadosimple.com` | `Vendedor123*` | Buenos Aires | Electrónica, Gaming, Audio |
-| **ModaBA** | `modaba@mercadosimple.com` | `Vendedor123*` | Buenos Aires | Ropa, Calzado, Accesorios |
-| **CasaHogar** | `casahogar@mercadosimple.com` | `Vendedor123*` | Rosario | Muebles, Electrodomésticos |
-| **DeportesPlus** | `deportesplus@mercadosimple.com` | `Vendedor123*` | Córdoba | Deportes, Fitness, Outdoor |
-| **AgroSimple** | `agrosimple@mercadosimple.com` | `Vendedor123*` | Rosario | Agro, Campo, Ganadería |
+El catálogo lo generan los vendedores reales. El seed solo deja **categorías** para clasificar publicaciones.
 
----
-
-### 👤 Compradores (5 cuentas activas)
-
-| Nombre | Email | Contraseña | Ciudad |
-|--------|-------|------------|--------|
-| **Usuario Demo** | `comprador@mercadosimple.com` | `Comprador123*` | Córdoba |
-| **María García** | `maria.garcia@gmail.com` | `Comprador123*` | Buenos Aires |
-| **Carlos López** | `carlos.lopez@gmail.com` | `Comprador123*` | Mendoza |
-| **Ana Fernández** | `ana.fernandez@gmail.com` | `Comprador123*` | Rosario |
-| **Pedro Martínez** | `pedro.martinez@gmail.com` | `Comprador123*` | Tucumán |
-
----
-
-## 📦 CATÁLOGO DE PRODUCTOS (60+ productos)
-
-### Por tienda:
-- **TechStore** (17 productos): iPhone 15 Pro, Samsung S24 Ultra, MacBook Pro M3, PS5 Slim, Xbox Series X, Nintendo Switch, Sony WH-1000XM5, Canon EOS R6 II, etc.
-- **ModaBA** (8 productos): Nike Air Max, Adidas Ultraboost, Converse, Levi's 501, Ray-Ban Aviador, etc.
-- **CasaHogar** (8 productos): Sillón Nórdico, Mesa Comedor Extensible, Lavarropas Whirlpool, Heladera LG Side by Side, Aire Acondicionado Carrier, etc.
-- **DeportesPlus** (7 productos): Pelota UCL, MTB SLP, Mancuernas Ajustables, ASICS Gel-Nimbus, The North Face Puffer, etc.
-- **AgroSimple** (6 productos): Tractor PAUNY 280, Semillas Soja RR, Glifosato 48%, Mochila Fumigadora, etc.
-
-### Categorías disponibles (20):
+### Categorías base (tras seed):
 Smartphones · Televisores · Laptops y PC · Audio · Gaming · Tablets · Cámaras · Electrodomésticos · Muebles y Deco · Ropa · Calzado · Deportes · **Automotor** · **Agro y Campo** · **Herramientas** · **Bebés y Niños** · Salud y Belleza · Libros · Mascotas · Colección y Arte
 
 ---

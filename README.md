@@ -97,25 +97,27 @@ docker-compose run --rm certbot certonly \
 docker-compose restart nginx
 ```
 
-### 4. Carga inicial de datos de prueba
+### 4. Carga inicial (dueño + categorías)
+
+El seed crea **solo** el administrador y las categorías. Vendedores y compradores se registran en la web o vía `POST /api/auth/register`.
 
 ```bash
 docker-compose exec backend node dist/database/seeds/run-seed.js
 ```
 
+Variables: `ADMIN_SEED_EMAIL` y `ADMIN_SEED_PASSWORD` (ver `backend/.env.example`).
+
 ---
 
-## Cuentas de prueba
+## Acceso inicial
 
-Tras ejecutar `npm run seed` en el backend (o el seed en producción, ver [DEPLOY.md](DEPLOY.md)):
+| Rol | Origen | Notas |
+|-----|--------|--------|
+| **Dueño / admin** | `npm run seed` o `POST /api/admin/seed` | Credenciales en `ADMIN_SEED_*` (por defecto en `.env.example`; **cambiar en producción**). |
+| **Vendedor** | Registro en `/auth/registro?role=seller` | Publica con `POST /api/products` (panel vendedor). |
+| **Comprador** | Registro en `/auth/registro` | Compra con carrito + checkout. |
 
-| Rol | Email | Contraseña |
-|-----|-------|-----------|
-| Administrador | admin@mercadosimple.com | Admin123* |
-| Vendedor | techstore@mercadosimple.com | Vendedor123* |
-| Comprador | comprador@mercadosimple.com | Comprador123* |
-
-Listado completo de vendedores y compradores en **[GUIA-DE-PRUEBAS.md](GUIA-DE-PRUEBAS.md)**.
+Reinicio total de datos: `POST /api/admin/reset-platform` con confirmación (ver [DEPLOY.md](DEPLOY.md)).
 
 ---
 
