@@ -33,7 +33,7 @@ export default function ResetPasswordPage() {
       await api.post('/auth/reset-password', { token, password });
       setSuccess(true);
       toast.success('Contraseña actualizada correctamente');
-      setTimeout(() => router.push('/auth/login'), 3000);
+      setTimeout(() => router.push('/auth/login'), 4000);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       toast.error(msg || 'Token inválido o expirado');
@@ -44,12 +44,25 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
         <div className="card max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✅</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Contraseña actualizada!</h2>
-          <p className="text-gray-600 mb-4">Tu contraseña fue cambiada exitosamente. Redirigiendo al login...</p>
-          <Link href="/auth/login" className="btn-primary">Ir al login</Link>
+          <p className="text-gray-600 mb-2 text-sm">
+            Tu nueva clave aplica a <strong>Mercado Simple</strong> y a <strong>Pago Simple</strong> (misma cuenta).
+          </p>
+          <p className="text-gray-500 text-xs mb-6">Redirigiendo al login del marketplace en unos segundos…</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/auth/login" className="btn-primary text-center py-3 px-4">
+              Ir a Mercado Simple
+            </Link>
+            <Link
+              href="/pago-simple/auth/login"
+              className="py-3 px-4 rounded-lg border-2 border-ms-blue text-ms-blue font-semibold hover:bg-blue-50 transition-colors text-center"
+            >
+              Ir a Pago Simple
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -63,7 +76,7 @@ export default function ResetPasswordPage() {
             mercado<span className="text-ms-yellow bg-ms-blue px-1 rounded">simple</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-6 mb-2">Nueva contraseña</h1>
-          <p className="text-gray-500 text-sm">Ingresá tu nueva contraseña</p>
+          <p className="text-gray-500 text-sm">Ingresá tu nueva contraseña (válida en Mercado Simple y Pago Simple).</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -116,8 +129,13 @@ export default function ResetPasswordPage() {
             {isLoading ? 'Actualizando...' : 'Actualizar contraseña'}
           </button>
         </form>
-        <p className="text-center text-sm text-gray-500 mt-4">
-          <Link href="/auth/login" className="text-ms-blue hover:underline">← Volver al login</Link>
+        <p className="text-center text-sm text-gray-500 mt-4 space-y-1">
+          <Link href="/auth/login" className="text-ms-blue hover:underline block">
+            ← Login Mercado Simple
+          </Link>
+          <Link href="/pago-simple/auth/login" className="text-blue-600 hover:underline block text-xs">
+            Login Pago Simple
+          </Link>
         </p>
       </div>
     </div>

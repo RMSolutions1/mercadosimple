@@ -308,8 +308,8 @@ export function Navbar() {
                 </Link>
               )}
 
-              {/* TEMA TOGGLE */}
-              <ThemeToggle size="sm" className="hidden md:flex opacity-80 hover:opacity-100" />
+              {/* TEMA TOGGLE — visible también en móvil (antes solo md+) */}
+              <ThemeToggle size="sm" className="flex opacity-80 hover:opacity-100 flex-shrink-0" />
 
               {/* CARRITO */}
               <button onClick={openCart} className="relative flex flex-col items-center p-2 rounded-xl hover:bg-white/10 transition-colors">
@@ -392,12 +392,12 @@ export function Navbar() {
                         <div className="mx-4 my-1 h-px bg-gray-100" />
                         <p className="px-4 pt-1 pb-1 text-[10px] font-bold text-blue-500 uppercase tracking-wider">⚡ Pago Simple</p>
                         {[
-                          { href: '/mi-cuenta?tab=billetera', Icon: Wallet, label: 'Mi billetera' },
-                          { href: '/mi-cuenta?tab=depositar', Icon: Wallet, label: 'Cargar saldo' },
-                          { href: '/mi-cuenta?tab=transferir', Icon: Wallet, label: 'Transferir dinero' },
-                          { href: '/mi-cuenta?tab=servicios', Icon: Wallet, label: 'Pagar servicios' },
-                          { href: '/mi-cuenta?tab=qr', Icon: Wallet, label: 'Cobrar con QR' },
-                          { href: '/billetera/extracto', Icon: Wallet, label: 'Extracto de cuenta' },
+                          { href: '/pago-simple/billetera', Icon: Wallet, label: 'Mi billetera' },
+                          { href: '/pago-simple/cargar-saldo', Icon: Wallet, label: 'Cargar saldo' },
+                          { href: '/pago-simple/transferir', Icon: Wallet, label: 'Transferir dinero' },
+                          { href: '/pago-simple/pagar-servicios', Icon: Wallet, label: 'Pagar servicios' },
+                          { href: '/pago-simple/cobrar-qr', Icon: Wallet, label: 'Cobrar con QR' },
+                          { href: '/pago-simple/extracto', Icon: Wallet, label: 'Extracto de cuenta' },
                         ].map(({ href, Icon, label }) => (
                           <Link key={href} href={href} onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors group"
@@ -503,6 +503,10 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="lg:hidden bg-white text-gray-900 border-t border-gray-100 shadow-xl">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-1.5">
+            <div className="flex items-center justify-between px-2 py-2 mb-2 rounded-xl bg-gray-50 border border-gray-100">
+              <span className="text-sm font-semibold text-gray-700">Tema</span>
+              <ThemeToggle size="sm" />
+            </div>
             {loggedIn && user ? (
               <>
                 {/* Perfil usuario */}
@@ -539,11 +543,12 @@ export function Navbar() {
 
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 pt-2">Pago Simple</p>
                 {[
-                  { href: '/mi-cuenta?tab=billetera', icon: '⚡', label: 'Mi billetera Pago Simple' },
-                  { href: '/mi-cuenta?tab=depositar', icon: '➕', label: 'Cargar saldo' },
-                  { href: '/mi-cuenta?tab=transferir', icon: '↗️', label: 'Transferir' },
-                  { href: '/mi-cuenta?tab=servicios', icon: '🧾', label: 'Pagar servicios' },
-                  { href: '/mi-cuenta?tab=qr', icon: '📱', label: 'Cobrar por QR' },
+                  { href: '/pago-simple/billetera', icon: '⚡', label: 'Mi billetera Pago Simple' },
+                  { href: '/pago-simple/cargar-saldo', icon: '➕', label: 'Cargar saldo' },
+                  { href: '/pago-simple/transferir', icon: '↗️', label: 'Transferir' },
+                  { href: '/pago-simple/pagar-servicios', icon: '🧾', label: 'Pagar servicios' },
+                  { href: '/pago-simple/cobrar-qr', icon: '📱', label: 'Cobrar por QR' },
+                  { href: '/pago-simple/extracto', icon: '📄', label: 'Extracto de cuenta' },
                 ].map((item) => (
                   <Link key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-colors text-gray-600 text-sm"

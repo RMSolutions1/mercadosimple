@@ -23,10 +23,16 @@ async function bootstrap() {
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const allowedOrigins = frontendUrl.split(',').map((url) => url.trim());
+  const isDevLocalOrigin = (o: string) =>
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(o);
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const devOk =
+        process.env.NODE_ENV !== 'production' &&
+        !!origin &&
+        isDevLocalOrigin(origin);
+      if (!origin || allowedOrigins.includes(origin) || devOk) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

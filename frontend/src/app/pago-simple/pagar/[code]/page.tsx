@@ -72,7 +72,7 @@ export default function PayLinkPage() {
 
   const handlePay = async () => {
     if (!isAuthenticated) {
-      router.push(`/auth/login?returnUrl=/pago-simple/pagar/${code}`);
+      router.push(`/pago-simple/auth/login?returnUrl=${encodeURIComponent(`/pago-simple/pagar/${code}`)}`);
       return;
     }
     setProcessing(true);
@@ -267,10 +267,10 @@ export default function PayLinkPage() {
                   ) : (
                     <div className="space-y-3">
                       <p className="text-center text-sm text-gray-500">Para pagar, ingresá a tu cuenta</p>
-                      <Link href={`/auth/login?returnUrl=/pago-simple/pagar/${code}`} className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
+                      <Link href={`/pago-simple/auth/login?returnUrl=${encodeURIComponent(`/pago-simple/pagar/${code}`)}`} className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                         Ingresar para pagar
                       </Link>
-                      <Link href={`/auth/registro?returnUrl=/pago-simple/pagar/${code}`} className="w-full py-3 rounded-2xl font-medium border-2 border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                      <Link href={`/pago-simple/auth/registro?returnUrl=${encodeURIComponent(`/pago-simple/pagar/${code}`)}`} className="w-full py-3 rounded-2xl font-medium border-2 border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-50 transition-colors">
                         Crear cuenta gratis
                       </Link>
                     </div>

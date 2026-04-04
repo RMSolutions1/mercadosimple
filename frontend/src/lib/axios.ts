@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import { redirectToLoginPreserveReturn } from '@/lib/auth-routes';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -78,7 +79,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth-storage');
-          window.location.href = '/auth/login';
+          redirectToLoginPreserveReturn();
         }
         return Promise.reject(refreshError);
       } finally {

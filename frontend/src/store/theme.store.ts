@@ -25,6 +25,14 @@ export const useThemeStore = create<ThemeState>()(
         }
       },
     }),
-    { name: 'ms-theme' }
+    {
+      name: 'ms-theme',
+      /** Sincroniza <html class="dark"> al leer localStorage (evita que el primer render fuerce modo claro). */
+      onRehydrateStorage: () => (state) => {
+        if (state && typeof document !== 'undefined') {
+          document.documentElement.classList.toggle('dark', state.isDark);
+        }
+      },
+    }
   )
 );

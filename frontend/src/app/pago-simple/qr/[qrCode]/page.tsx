@@ -61,7 +61,7 @@ export default function PayQRPage() {
 
   const handlePay = async () => {
     if (!isAuthenticated) {
-      router.push(`/auth/login?returnUrl=/pago-simple/qr/${qrCode}`);
+      router.push(`/pago-simple/auth/login?returnUrl=${encodeURIComponent(`/pago-simple/qr/${qrCode}`)}`);
       return;
     }
     if (!amountToPay || amountToPay <= 0) {
@@ -207,7 +207,7 @@ export default function PayQRPage() {
                       )}
                     </button>
                   ) : (
-                    <Link href={`/auth/login?returnUrl=/pago-simple/qr/${qrCode}`} className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
+                    <Link href={`/pago-simple/auth/login?returnUrl=${encodeURIComponent(`/pago-simple/qr/${qrCode}`)}`} className="w-full py-4 rounded-2xl font-bold text-white text-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                       Ingresar para pagar
                     </Link>
                   )}

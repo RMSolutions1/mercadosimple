@@ -48,7 +48,7 @@ const FOOTER_COLS = [
     title: 'Cobrar',
     links: [
       { label: 'Links de cobro', href: '/mi-cuenta?tab=billetera' },
-      { label: 'Cobro con QR', href: '/mi-cuenta?tab=qr' },
+      { label: 'Cobro con QR', href: '/pago-simple/cobrar-qr' },
       { label: 'Cuotas', href: '/pago-simple#calculadora' },
       { label: 'Liquidaciones', href: '/mi-cuenta?tab=billetera' },
     ],
@@ -56,10 +56,11 @@ const FOOTER_COLS = [
   {
     title: 'Pagar',
     links: [
-      { label: 'Mi billetera', href: '/mi-cuenta?tab=billetera' },
-      { label: 'Cargar saldo', href: '/mi-cuenta?tab=depositar' },
-      { label: 'Transferir', href: '/mi-cuenta?tab=transferir' },
-      { label: 'Pagar servicios', href: '/mi-cuenta?tab=servicios' },
+      { label: 'Mi billetera', href: '/pago-simple/billetera' },
+      { label: 'Cargar saldo', href: '/pago-simple/cargar-saldo' },
+      { label: 'Transferir', href: '/pago-simple/transferir' },
+      { label: 'Pagar servicios', href: '/pago-simple/pagar-servicios' },
+      { label: 'Extracto', href: '/pago-simple/extracto' },
     ],
   },
   {
@@ -247,10 +248,10 @@ export default function PagoSimplePage() {
                 </>
               ) : (
                 <>
-                  <Link href="/auth/login" className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50">
+                  <Link href="/pago-simple/auth/login" className="px-4 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-50">
                     Ingresar
                   </Link>
-                  <Link href="/auth/registro" className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
+                  <Link href="/pago-simple/auth/registro" className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                     Registrarse gratis
                   </Link>
                 </>
@@ -279,8 +280,8 @@ export default function PagoSimplePage() {
                   </>
                 ) : (
                   <>
-                    <Link href="/auth/login" className="flex-1 py-2.5 rounded-xl border text-center font-medium" onClick={() => setMobileMenuOpen(false)}>Ingresar</Link>
-                    <Link href="/auth/registro" className="flex-1 py-2.5 rounded-xl font-bold text-white text-center text-sm" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }} onClick={() => setMobileMenuOpen(false)}>Registrarse</Link>
+                    <Link href="/pago-simple/auth/login" className="flex-1 py-2.5 rounded-xl border text-center font-medium" onClick={() => setMobileMenuOpen(false)}>Ingresar</Link>
+                    <Link href="/pago-simple/auth/registro" className="flex-1 py-2.5 rounded-xl font-bold text-white text-center text-sm" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }} onClick={() => setMobileMenuOpen(false)}>Registrarse</Link>
                   </>
                 )}
               </div>
@@ -318,7 +319,7 @@ export default function PagoSimplePage() {
                       <Plus className="w-5 h-5" /> Crear Link de Cobro
                     </button>
                   ) : (
-                    <Link href="/auth/registro" className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-lg transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
+                    <Link href="/pago-simple/auth/registro" className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-lg transition-all hover:scale-105" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                       Empezar Gratis <ArrowRight className="w-5 h-5" />
                     </Link>
                   )}
@@ -362,7 +363,7 @@ export default function PagoSimplePage() {
             <p className="text-gray-500 text-center max-w-2xl mx-auto mb-12">En tres pasos empezás a cobrar o a pagar con Pago Simple.</p>
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { step: '1', icon: Wallet, title: 'Creá tu cuenta', desc: 'Registrate gratis en Mercado Simple y activá tu billetera Pago Simple en segundos.' },
+                { step: '1', icon: Wallet, title: 'Creá tu cuenta', desc: 'Registrate gratis en Pago Simple; la misma cuenta sirve para Mercado Simple y tu billetera.' },
                 { step: '2', icon: Link2, title: 'Generá links o QR', desc: 'Creá un link de cobro o mostrá tu QR. Tu cliente paga con un clic o escaneando.' },
                 { step: '3', icon: CheckCircle, title: 'Recibí el dinero', desc: 'El dinero cae en tu billetera. Podés transferir a tu banco o usarlo en la plataforma.' },
               ].map(({ step, icon: Icon, title, desc }) => (
@@ -474,7 +475,7 @@ export default function PagoSimplePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/auth/registro?role=seller" className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl font-bold text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
+                <Link href="/pago-simple/auth/registro?role=seller" className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl font-bold text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                   Empezar a vender <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -503,7 +504,7 @@ export default function PagoSimplePage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/auth/registro" className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl font-bold text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
+                <Link href="/pago-simple/auth/registro" className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl font-bold text-white" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>
                   Crear cuenta gratis <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -564,7 +565,7 @@ export default function PagoSimplePage() {
                   <Link href="/mi-cuenta?tab=billetera" className="px-8 py-4 rounded-2xl font-bold border border-white/20 text-white text-lg hover:bg-white/10 transition-all">Ver mi Billetera</Link>
                 </>
               ) : (
-                <Link href="/auth/registro?role=seller" className="px-10 py-4 rounded-2xl font-bold text-white text-lg" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>Registrarme gratis</Link>
+                <Link href="/pago-simple/auth/registro?role=seller" className="px-10 py-4 rounded-2xl font-bold text-white text-lg" style={{ background: 'linear-gradient(135deg, #3B82F6, #10B981)' }}>Registrarme gratis</Link>
               )}
             </div>
           </div>

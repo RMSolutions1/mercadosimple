@@ -27,20 +27,20 @@ const FOOTER_COLS = [
   {
     title: 'Pago Simple',
     links: [
-      { label: 'Mi billetera',       href: '/mi-cuenta?tab=billetera' },
-      { label: 'Cargar saldo',       href: '/mi-cuenta?tab=depositar' },
-      { label: 'Transferir dinero',  href: '/mi-cuenta?tab=transferir' },
-      { label: 'Pagar servicios',    href: '/mi-cuenta?tab=servicios' },
-      { label: 'Cobrar con QR',      href: '/mi-cuenta?tab=qr' },
-      { label: 'Extracto de cuenta', href: '/billetera/extracto' },
-      { label: 'Acerca de Pago Simple', href: '/pago-simple' },
+      { label: 'Mi billetera',           href: '/pago-simple/billetera' },
+      { label: 'Cargar saldo',           href: '/pago-simple/cargar-saldo' },
+      { label: 'Transferir dinero',      href: '/pago-simple/transferir' },
+      { label: 'Pagar servicios',        href: '/pago-simple/pagar-servicios' },
+      { label: 'Cobrar con QR',          href: '/pago-simple/cobrar-qr' },
+      { label: 'Extracto de cuenta',     href: '/pago-simple/extracto' },
+      { label: 'Acerca de Pago Simple',  href: '/pago-simple' },
     ],
   },
   {
     title: 'Ayuda y legal',
     links: [
       { label: 'Centro de ayuda',        href: '/ayuda' },
-      { label: 'Centro de seguridad',    href: '/proteccion-comprador' },
+      { label: 'Accesibilidad',          href: '/accesibilidad' },
       { label: 'Términos y condiciones', href: '/terminos' },
       { label: 'Privacidad',             href: '/privacidad' },
       { label: 'Defensa del consumidor', href: '/defensa-consumidor' },
@@ -56,7 +56,7 @@ const FOOTER_COLS = [
       { label: 'Inversores',           href: '/inversores' },
       { label: 'Prensa',               href: '/prensa' },
       { label: 'Sustentabilidad',      href: '/sustentabilidad' },
-      { label: 'Developers',           href: '/contacto' },
+      { label: 'Soporte API / partners', href: '/contacto' },
     ],
   },
 ];

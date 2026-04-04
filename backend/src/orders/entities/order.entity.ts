@@ -22,6 +22,8 @@ export enum OrderStatus {
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
   REFUNDED = 'refunded',
+  /** Reclamo / mediación (visible en panel admin disputas) */
+  DISPUTED = 'disputed',
 }
 
 export enum PaymentStatus {

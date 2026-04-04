@@ -40,6 +40,7 @@ function ProductsContent() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   const search = searchParams.get('search') || '';
@@ -69,11 +70,15 @@ function ProductsContent() {
       params.set('limit', '20');
 
       const { data } = await api.get(`/products?${params.toString()}`);
+      setLoadError(false);
       setProducts(data.products || []);
       setTotal(data.total || 0);
       setTotalPages(data.totalPages || 1);
-    } catch (error) {
+    } catch {
+      setLoadError(true);
       setProducts([]);
+      setTotal(0);
+      setTotalPages(1);
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +123,9 @@ function ProductsContent() {
           <h1 className="text-xl font-bold text-gray-900">
             {search ? `Resultados para "${search}"` : 'Todos los productos'}
           </h1>
-          {!isLoading && <p className="text-sm text-gray-500 mt-0.5">{total} productos encontrados</p>}
+          {!isLoading && !loadError && (
+            <p className="text-sm text-gray-500 mt-0.5">{total} productos encontrados</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setShowFilters(!showFilters)} className="md:hidden flex items-center gap-2 text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 hover:bg-gray-50">
@@ -188,11 +195,29 @@ function ProductsContent() {
                 </div>
               ))}
             </div>
+          ) : loadError ? (
+            <div className="text-center py-20 max-w-md mx-auto">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No pudimos cargar el catálogo</h3>
+              <p className="text-gray-500 text-sm mb-4">
+                Comprobá que el backend esté en marcha y que{' '}
+                <code className="text-xs bg-gray-100 px-1 rounded">NEXT_PUBLIC_API_URL</code> apunte a la API
+                (por ejemplo <code className="text-xs bg-gray-100 px-1 rounded">http://localhost:3001/api</code>).
+              </p>
+              <button type="button" onClick={() => fetchProducts()} className="btn-primary">
+                Reintentar
+              </button>
+            </div>
           ) : products.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No encontramos productos</h3>
-              <p className="text-gray-500 text-sm mb-6">Intentá con otros términos o quitá algunos filtros</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay productos para mostrar</h3>
+              <p className="text-gray-500 text-sm mb-2">
+                Si estás en local, ejecutá el seed con{' '}
+                <code className="text-xs bg-gray-100 px-1 rounded">SEED_DEMO_USERS=true</code> (incluye catálogo
+                demo) o publicá desde el panel de vendedor.
+              </p>
+              <p className="text-gray-500 text-sm mb-6">Con filtros activos, probá limpiarlos.</p>
               <button onClick={clearFilters} className="btn-primary">Limpiar filtros</button>
             </div>
           ) : (

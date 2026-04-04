@@ -10,13 +10,27 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ className = '', size = 'md' }: ThemeToggleProps) {
-  const { isDark, toggle, setDark } = useThemeStore();
+  const { isDark, toggle } = useThemeStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Apply saved preference on mount
-    setDark(isDark);
+  }, []);
+
+  useEffect(() => {
+    const applyFromStore = () => {
+      const d = useThemeStore.getState().isDark;
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark', d);
+      }
+    };
+    const unsub = useThemeStore.persist.onFinishHydration(() => {
+      applyFromStore();
+    });
+    if (useThemeStore.persist.hasHydrated()) {
+      applyFromStore();
+    }
+    return unsub;
   }, []);
 
   if (!mounted) return null;

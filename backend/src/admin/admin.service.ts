@@ -8,6 +8,12 @@ import { Payment } from '../payments/entities/payment.entity';
 import { Wallet } from '../wallet/entities/wallet.entity';
 import { WalletTransaction, WalletTransactionType, WalletTransactionStatus } from '../wallet/entities/wallet-transaction.entity';
 import { TransferReceipt, ReceiptStatus } from '../wallet/entities/transfer-receipt.entity';
+import { Category } from '../categories/entities/category.entity';
+import { Review } from '../reviews/entities/review.entity';
+import { Question, QuestionStatus } from '../questions/entities/question.entity';
+import { Conversation } from '../chat/entities/conversation.entity';
+import { Message } from '../chat/entities/message.entity';
+import { OrderStatus } from '../orders/entities/order.entity';
 
 @Injectable()
 export class AdminService {
@@ -26,6 +32,16 @@ export class AdminService {
     private txRepository: Repository<WalletTransaction>,
     @InjectRepository(TransferReceipt)
     private receiptRepository: Repository<TransferReceipt>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
+    @InjectRepository(Review)
+    private reviewRepository: Repository<Review>,
+    @InjectRepository(Question)
+    private questionRepository: Repository<Question>,
+    @InjectRepository(Conversation)
+    private conversationRepository: Repository<Conversation>,
+    @InjectRepository(Message)
+    private messageRepository: Repository<Message>,
     private dataSource: DataSource,
   ) {}
 
@@ -175,11 +191,11 @@ export class AdminService {
     return { message: `Rol cambiado de ${oldRole} a ${newRole}`, role: newRole };
   }
 
-  async updateOrderStatus(orderId: string, status: string, adminNote?: string) {
+  async updateOrderStatus(orderId: string, status: OrderStatus, adminNote?: string) {
     const order = await this.orderRepository.findOne({ where: { id: orderId }, relations: ['buyer', 'items'] });
     if (!order) throw new NotFoundException('Orden no encontrada');
     const oldStatus = order.status;
-    order.status = status as any;
+    order.status = status;
     if (adminNote) (order as any).adminNote = adminNote;
     await this.orderRepository.save(order);
     return { message: `Estado de orden cambiado de ${oldStatus} a ${status}`, status };
@@ -505,5 +521,109 @@ export class AdminService {
       status: ReceiptStatus.FAILED,
     });
     return { message: 'Depósito rechazado' };
+  }
+
+  // ── Categorías ─────────────────────────────────────────────
+  async getAllCategories() {
+    return this.categoryRepository.find({ order: { name: 'ASC' } });
+  }
+
+  async createCategory(data: { name: string; slug: string; icon?: string; image?: string; description?: string }) {
+    const exists = await this.categoryRepository.findOne({ where: [{ slug: data.slug }, { name: data.name }] });
+    if (exists) throw new BadRequestException('Ya existe una categoría con ese nombre o slug');
+    const cat = this.categoryRepository.create(data);
+    return this.categoryRepository.save(cat);
+  }
+
+  async updateCategory(
+    id: string,
+    data: Partial<{ name: string; slug: string; icon: string; image: string; description: string }>,
+  ) {
+    const cat = await this.categoryRepository.findOne({ where: { id } });
+    if (!cat) throw new NotFoundException('Categoría no encontrada');
+    if (data.slug && data.slug !== cat.slug) {
+      const clash = await this.categoryRepository.findOne({ where: { slug: data.slug } });
+      if (clash) throw new BadRequestException('Ese slug ya está en uso');
+    }
+    Object.assign(cat, data);
+    return this.categoryRepository.save(cat);
+  }
+
+  async deleteCategory(id: string) {
+    const n = await this.productRepository.count({ where: { categoryId: id } });
+    if (n > 0) throw new BadRequestException(`No se puede eliminar: hay ${n} producto(s) en esta categoría`);
+    const r = await this.categoryRepository.delete(id);
+    if (!r.affected) throw new NotFoundException('Categoría no encontrada');
+    return { message: 'Categoría eliminada' };
+  }
+
+  // ── Reseñas ────────────────────────────────────────────────
+  async getAllReviews(page = 1, limit = 30) {
+    const [reviews, total] = await this.reviewRepository.findAndCount({
+      relations: ['reviewer', 'product'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { reviews, total, page, totalPages: Math.ceil(total / limit) };
+  }
+
+  async deleteReview(id: string) {
+    const r = await this.reviewRepository.delete(id);
+    if (!r.affected) throw new NotFoundException('Reseña no encontrada');
+    return { message: 'Reseña eliminada' };
+  }
+
+  // ── Preguntas públicas ─────────────────────────────────────
+  async getAllQuestions(page = 1, limit = 40) {
+    const [questions, total] = await this.questionRepository.findAndCount({
+      relations: ['asker', 'product', 'answerer'],
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { questions, total, page, totalPages: Math.ceil(total / limit) };
+  }
+
+  async deleteQuestion(id: string) {
+    const q = await this.questionRepository.findOne({ where: { id } });
+    if (!q) throw new NotFoundException('Pregunta no encontrada');
+    q.status = QuestionStatus.DELETED;
+    await this.questionRepository.save(q);
+    return { message: 'Pregunta ocultada (moderación)' };
+  }
+
+  // ── Chat comprador–vendedor ────────────────────────────────
+  async getAllConversations(page = 1, limit = 30) {
+    const [rows, total] = await this.conversationRepository.findAndCount({
+      relations: ['buyer', 'seller', 'product'],
+      order: { lastMessageAt: 'DESC', createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    const withCounts = await Promise.all(
+      rows.map(async (c) => {
+        const msgCount = await this.messageRepository.count({ where: { conversationId: c.id } });
+        return { ...c, messageCount: msgCount };
+      }),
+    );
+    return { conversations: withCounts, total, page, totalPages: Math.ceil(total / limit) };
+  }
+
+  async deleteConversation(id: string) {
+    const c = await this.conversationRepository.findOne({ where: { id } });
+    if (!c) throw new NotFoundException('Conversación no encontrada');
+    await this.messageRepository.delete({ conversationId: id });
+    await this.conversationRepository.delete(id);
+    return { message: 'Conversación y mensajes eliminados' };
+  }
+
+  /** Baja lógica: el producto deja de mostrarse en el catálogo público */
+  async adminRemoveProduct(productId: string) {
+    const product = await this.productRepository.findOne({ where: { id: productId } });
+    if (!product) throw new NotFoundException('Producto no encontrado');
+    product.status = ProductStatus.DELETED;
+    await this.productRepository.save(product);
+    return { message: 'Producto dado de baja del catálogo' };
   }
 }

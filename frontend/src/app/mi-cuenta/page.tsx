@@ -14,6 +14,7 @@ import {
   FileText, AlertCircle, Store, DollarSign, Download, Share2, Clock, Loader2, Search,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useThemeStore } from '@/store/theme.store';
 import { useAuthHydrationReady } from '@/hooks/useAuthHydrationReady';
 import { useWalletStore } from '@/store/wallet.store';
 import { SolMayo } from '@/components/ui/SolMayo';
@@ -2614,7 +2615,8 @@ function DireccionesTab() {
 function ConfiguracionTab() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
-  const [darkMode, setDarkMode] = useState(false);
+  const isDark = useThemeStore((s) => s.isDark);
+  const setDark = useThemeStore((s) => s.setDark);
   const [language, setLanguage] = useState('es');
   const [currency, setCurrency] = useState('ARS');
   const [twoFactor, setTwoFactor] = useState(false);
@@ -2641,9 +2643,12 @@ function ConfiguracionTab() {
               <p className="text-sm font-semibold text-gray-900">Modo oscuro</p>
               <p className="text-xs text-gray-400">Cambiá el tema visual de la plataforma</p>
             </div>
-            <button onClick={() => setDarkMode(p => !p)}
-              className={`relative w-11 h-6 rounded-full transition-all duration-300 ${darkMode ? 'bg-blue-600' : 'bg-gray-200'}`}>
-              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${darkMode ? 'left-5' : 'left-0.5'}`} />
+            <button
+              type="button"
+              onClick={() => setDark(!isDark)}
+              aria-pressed={isDark}
+              className={`relative w-11 h-6 rounded-full transition-all duration-300 ${isDark ? 'bg-blue-600' : 'bg-gray-200'}`}>
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
           <div className="flex items-center justify-between">

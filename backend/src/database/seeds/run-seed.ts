@@ -63,7 +63,7 @@ function typeOrmConfig() {
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(typeOrmConfig()),
-    TypeOrmModule.forFeature([User, Category]),
+    TypeOrmModule.forFeature([User, Category, Product]),
     WalletModule,
   ],
   providers: [SeedService],

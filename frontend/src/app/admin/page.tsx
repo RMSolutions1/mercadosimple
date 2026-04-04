@@ -1,7 +1,7 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -12,9 +12,12 @@ import {
   MessageSquare, Download, ArrowUpRight, ArrowDownLeft, Zap, Globe,
   ChevronDown, Edit, TrendingDown, BarChart3, PieChart as PieIcon,
   Clock, CheckSquare, AlertOctagon, Send, Mail, CreditCard, Hash,
-  UserCog, Database, Server, Percent,
+  UserCog, Database, Server, Percent, Trash2,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useAuthHydrationReady } from '@/hooks/useAuthHydrationReady';
+import { hasValidClientSession } from '@/lib/auth-storage';
+import { ProtectedSessionGate } from '@/components/auth/ProtectedSessionGate';
 import { SolMayo } from '@/components/ui/SolMayo';
 import { formatPrice, getStatusLabel, getStatusColor, formatDate } from '@/lib/utils';
 import api from '@/lib/axios';
@@ -24,7 +27,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell, AreaChart, Area,
 } from 'recharts';
 
-type AdminTab = 'overview' | 'users' | 'wallets' | 'transactions' | 'deposits' | 'products' | 'orders' | 'disputes' | 'reports' | 'settings';
+type AdminTab = 'overview' | 'users' | 'wallets' | 'transactions' | 'deposits' | 'products' | 'catalog' | 'orders' | 'disputes' | 'reports' | 'settings';
 
 const SIDEBAR_ITEMS: { key: AdminTab; icon: any; label: string; badge?: string; group?: string }[] = [
   { key: 'overview',      icon: BarChart2,     label: 'Panel de control',    group: 'Principal' },
@@ -33,6 +36,7 @@ const SIDEBAR_ITEMS: { key: AdminTab; icon: any; label: string; badge?: string; 
   { key: 'deposits',      icon: ArrowDownLeft, label: 'Cargas pendientes',   group: 'Finanzas' },
   { key: 'transactions',  icon: ArrowUpDown,   label: 'Transacciones',       group: 'Finanzas' },
   { key: 'products',      icon: Package,       label: 'Productos',           group: 'Marketplace' },
+  { key: 'catalog',       icon: Database,      label: 'Catálogo y moderación', group: 'Marketplace' },
   { key: 'orders',        icon: ShoppingBag,   label: 'Órdenes',             group: 'Marketplace' },
   { key: 'disputes',      icon: AlertTriangle, label: 'Disputas',            group: 'Soporte' },
   { key: 'reports',       icon: TrendingUp,    label: 'Reportes',            group: 'Análisis' },
@@ -54,9 +58,10 @@ const VERIFICATION_LABELS: Record<string, { label: string; color: string; bg: st
   none:     { label: 'Sin verificar', color: '#6B7280', bg: '#F9FAFB' },
 };
 
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
   const router = useRouter();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const authReady = useAuthHydrationReady();
 
   const [metrics, setMetrics]         = useState<any>(null);
   const [reports, setReports]         = useState<any>(null);
@@ -100,13 +105,55 @@ export default function AdminDashboardPage() {
   const [rejectReason, setRejectReason]       = useState('');
   const [rejectTarget, setRejectTarget]       = useState('');
 
+  const [catalogSub, setCatalogSub] = useState<'categories' | 'reviews' | 'questions' | 'chats'>('categories');
+  const [categoriesAdmin, setCategoriesAdmin] = useState<any[]>([]);
+  const [reviewsAdmin, setReviewsAdmin] = useState<any[]>([]);
+  const [questionsAdmin, setQuestionsAdmin] = useState<any[]>([]);
+  const [conversationsAdmin, setConversationsAdmin] = useState<any[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [newCat, setNewCat] = useState({ name: '', slug: '', icon: '📦', description: '' });
+
   useEffect(() => { setMounted(true); }, []);
 
+  const fetchCatalogModeration = async () => {
+    setCatalogLoading(true);
+    try {
+      const [c, r, q, conv] = await Promise.all([
+        api.get('/admin/categories'),
+        api.get('/admin/reviews?limit=80'),
+        api.get('/admin/questions?limit=80'),
+        api.get('/admin/conversations?limit=50'),
+      ]);
+      setCategoriesAdmin(Array.isArray(c.data) ? c.data : []);
+      setReviewsAdmin(r.data?.reviews || []);
+      setQuestionsAdmin(q.data?.questions || []);
+      setConversationsAdmin(conv.data?.conversations || []);
+    } catch {
+      toast.error('Error al cargar catálogo y moderación');
+    } finally {
+      setCatalogLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!mounted) return;
-    if (!isAuthenticated || user?.role !== 'admin') { router.push('/auth/login'); return; }
+    if (activeTab === 'catalog' && mounted && authReady && isAuthenticated && user?.role === 'admin') {
+      fetchCatalogModeration();
+    }
+  }, [activeTab, mounted, authReady, isAuthenticated, user?.role]);
+
+  useEffect(() => {
+    if (!mounted || !authReady) return;
+    if (!hasValidClientSession()) return;
+    if (!isAuthenticated) {
+      router.push(`/auth/login?returnUrl=${encodeURIComponent('/admin')}`);
+      return;
+    }
+    if (user?.role !== 'admin') {
+      router.push('/mi-cuenta');
+      return;
+    }
     fetchAll();
-  }, [isAuthenticated, user, mounted]);
+  }, [isAuthenticated, user, mounted, authReady, router]);
 
   const fetchAll = async () => {
     setIsLoading(true);
@@ -275,6 +322,75 @@ export default function AdminDashboardPage() {
     } catch { toast.error('Error al actualizar producto'); }
   };
 
+  const handleAdminDeleteProduct = async (productId: string) => {
+    if (!window.confirm('¿Dar de baja este producto del catálogo público? (estado eliminado)')) return;
+    try {
+      const { data } = await api.delete(`/admin/products/${productId}`);
+      toast.success(data.message || 'Producto dado de baja');
+      setProducts(p => p.map(pr => pr.id === productId ? { ...pr, status: 'deleted' } : pr));
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Error al eliminar');
+    }
+  };
+
+  const handleCreateCategory = async () => {
+    if (!newCat.name.trim() || !newCat.slug.trim()) {
+      toast.error('Nombre y slug obligatorios');
+      return;
+    }
+    try {
+      const { data } = await api.post('/admin/categories', {
+        name: newCat.name.trim(),
+        slug: newCat.slug.trim().toLowerCase().replace(/\s+/g, '-'),
+        icon: newCat.icon || '📦',
+        description: newCat.description || undefined,
+      });
+      toast.success('Categoría creada');
+      setCategoriesAdmin((p) => [...p, data]);
+      setNewCat({ name: '', slug: '', icon: '📦', description: '' });
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'Error al crear categoría');
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta categoría? (solo si no tiene productos)')) return;
+    try {
+      await api.delete(`/admin/categories/${id}`);
+      toast.success('Categoría eliminada');
+      setCategoriesAdmin((p) => p.filter((c) => c.id !== id));
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || 'No se pudo eliminar');
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta reseña permanentemente?')) return;
+    try {
+      await api.delete(`/admin/reviews/${id}`);
+      toast.success('Reseña eliminada');
+      setReviewsAdmin((p) => p.filter((r) => r.id !== id));
+    } catch { toast.error('Error al eliminar reseña'); }
+  };
+
+  const handleDeleteQuestion = async (id: string) => {
+    if (!window.confirm('¿Ocultar esta pregunta (moderación)?')) return;
+    try {
+      await api.delete(`/admin/questions/${id}`);
+      toast.success('Pregunta moderada');
+      setQuestionsAdmin((p) => p.filter((q) => q.id !== id));
+    } catch { toast.error('Error'); }
+  };
+
+  const handleDeleteConversation = async (id: string) => {
+    if (!window.confirm('¿Eliminar conversación y todos los mensajes?')) return;
+    try {
+      await api.delete(`/admin/conversations/${id}`);
+      toast.success('Conversación eliminada');
+      setConversationsAdmin((p) => p.filter((c) => c.id !== id));
+    } catch { toast.error('Error'); }
+  };
+
   const handleUpdateOrderStatus = async () => {
     if (!selectedOrder || !orderNewStatus) return;
     try {
@@ -286,7 +402,14 @@ export default function AdminDashboardPage() {
     } catch (e: any) { toast.error(e.response?.data?.message || 'Error al actualizar orden'); }
   };
 
-  if (!mounted || !isAuthenticated || user?.role !== 'admin') return null;
+  if (!mounted || !authReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" aria-label="Cargando" />
+      </div>
+    );
+  }
+  if (!isAuthenticated || user?.role !== 'admin') return null;
 
   const filteredUsers = users.filter(u => {
     const matchSearch = !search || u.name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase());
@@ -316,6 +439,7 @@ export default function AdminDashboardPage() {
     deposits:     'Cargas de saldo — Aprobación manual',
     transactions: 'Transacciones del sistema',
     products:     'Gestión de productos',
+    catalog:      'Catálogo, categorías y moderación de contenido',
     orders:       'Gestión de órdenes',
     disputes:     'Disputas y reclamos',
     reports:      'Reportes avanzados',
@@ -936,6 +1060,12 @@ export default function AdminDashboardPage() {
                               className="px-3 py-1.5 text-xs font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors flex items-center gap-1">
                               <Ban className="w-3 h-3" /> Pausar
                             </button>
+                            {product.status !== 'deleted' && (
+                              <button onClick={() => handleAdminDeleteProduct(product.id)}
+                                className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center gap-1">
+                                <Trash2 className="w-3 h-3" /> Baja
+                              </button>
+                            )}
                             <Link href={`/productos/${product.slug}`} target="_blank"
                               className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1">
                               <Eye className="w-3 h-3" /> Ver
@@ -951,6 +1081,171 @@ export default function AdminDashboardPage() {
                       )}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* ══ CATÁLOGO Y MODERACIÓN ══ */}
+              {activeTab === 'catalog' && (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {(['categories', 'reviews', 'questions', 'chats'] as const).map((k) => (
+                      <button
+                        key={k}
+                        onClick={() => setCatalogSub(k)}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                          catalogSub === k ? 'bg-violet-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        {k === 'categories' && 'Categorías'}
+                        {k === 'reviews' && `Reseñas (${reviewsAdmin.length})`}
+                        {k === 'questions' && `Preguntas (${questionsAdmin.length})`}
+                        {k === 'chats' && `Chats (${conversationsAdmin.length})`}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => fetchCatalogModeration()}
+                      className="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 ml-auto"
+                    >
+                      Actualizar datos
+                    </button>
+                  </div>
+
+                  {catalogLoading && (
+                    <p className="text-sm text-gray-500">Cargando…</p>
+                  )}
+
+                  {catalogSub === 'categories' && (
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                        <h3 className="font-bold text-gray-900 mb-3">Nueva categoría</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                          <input
+                            value={newCat.name}
+                            onChange={(e) => setNewCat((p) => ({ ...p, name: e.target.value }))}
+                            placeholder="Nombre"
+                            className="px-3 py-2 border rounded-xl text-sm"
+                          />
+                          <input
+                            value={newCat.slug}
+                            onChange={(e) => setNewCat((p) => ({ ...p, slug: e.target.value }))}
+                            placeholder="slug-unico"
+                            className="px-3 py-2 border rounded-xl text-sm"
+                          />
+                          <input
+                            value={newCat.icon}
+                            onChange={(e) => setNewCat((p) => ({ ...p, icon: e.target.value }))}
+                            placeholder="Emoji"
+                            className="px-3 py-2 border rounded-xl text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleCreateCategory}
+                            className="py-2 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700"
+                          >
+                            Crear
+                          </button>
+                        </div>
+                        <input
+                          value={newCat.description}
+                          onChange={(e) => setNewCat((p) => ({ ...p, description: e.target.value }))}
+                          placeholder="Descripción (opcional)"
+                          className="mt-3 w-full px-3 py-2 border rounded-xl text-sm"
+                        />
+                      </div>
+                      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="p-4 border-b border-gray-100 font-bold text-gray-900">
+                          Categorías ({categoriesAdmin.length})
+                        </div>
+                        <div className="divide-y divide-gray-50 max-h-[480px] overflow-y-auto">
+                          {categoriesAdmin.map((cat: any) => (
+                            <div key={cat.id} className="flex items-center justify-between px-4 py-3 gap-3">
+                              <div className="min-w-0">
+                                <span className="text-lg mr-2">{cat.icon || '📁'}</span>
+                                <span className="font-semibold text-gray-900">{cat.name}</span>
+                                <span className="text-xs text-gray-500 ml-2 font-mono">{cat.slug}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCategory(cat.id)}
+                                className="text-xs text-red-600 font-semibold hover:underline flex-shrink-0"
+                              >
+                                Eliminar
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {catalogSub === 'reviews' && (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                      <div className="p-4 border-b font-bold">Reseñas recientes</div>
+                      <div className="divide-y max-h-[560px] overflow-y-auto">
+                        {reviewsAdmin.map((rev: any) => (
+                          <div key={rev.id} className="px-4 py-3 flex gap-3 justify-between">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold">{rev.reviewer?.name} · {rev.rating}★</p>
+                              <p className="text-xs text-gray-500 truncate">{rev.product?.title}</p>
+                              {rev.comment && <p className="text-sm text-gray-700 mt-1 line-clamp-2">{rev.comment}</p>}
+                            </div>
+                            <button type="button" onClick={() => handleDeleteReview(rev.id)} className="text-red-600 text-xs font-bold flex-shrink-0">
+                              Quitar
+                            </button>
+                          </div>
+                        ))}
+                        {reviewsAdmin.length === 0 && <p className="p-8 text-center text-gray-400">Sin reseñas</p>}
+                      </div>
+                    </div>
+                  )}
+
+                  {catalogSub === 'questions' && (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                      <div className="p-4 border-b font-bold">Preguntas en productos</div>
+                      <div className="divide-y max-h-[560px] overflow-y-auto">
+                        {questionsAdmin.filter((q: any) => q.status !== 'deleted').map((q: any) => (
+                          <div key={q.id} className="px-4 py-3 flex justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm text-gray-800">{q.question}</p>
+                              <p className="text-xs text-gray-500 mt-1">{q.product?.title} · {q.asker?.name}</p>
+                            </div>
+                            <button type="button" onClick={() => handleDeleteQuestion(q.id)} className="text-red-600 text-xs font-bold flex-shrink-0">
+                              Moderar
+                            </button>
+                          </div>
+                        ))}
+                        {questionsAdmin.filter((q: any) => q.status !== 'deleted').length === 0 && (
+                          <p className="p-8 text-center text-gray-400">Sin preguntas</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {catalogSub === 'chats' && (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                      <div className="p-4 border-b font-bold">Conversaciones comprador ↔ vendedor</div>
+                      <div className="divide-y max-h-[560px] overflow-y-auto">
+                        {conversationsAdmin.map((cv: any) => (
+                          <div key={cv.id} className="px-4 py-3 flex justify-between gap-3">
+                            <div className="min-w-0 text-sm">
+                              <p className="font-semibold text-gray-900">
+                                {cv.buyer?.name} ↔ {cv.seller?.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {cv.messageCount ?? 0} mensajes
+                                {cv.product?.title ? ` · ${cv.product.title}` : ''}
+                              </p>
+                            </div>
+                            <button type="button" onClick={() => handleDeleteConversation(cv.id)} className="text-red-600 text-xs font-bold flex-shrink-0">
+                              Eliminar
+                            </button>
+                          </div>
+                        ))}
+                        {conversationsAdmin.length === 0 && <p className="p-8 text-center text-gray-400">Sin conversaciones</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1774,5 +2069,21 @@ export default function AdminDashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <ProtectedSessionGate returnPath="/admin">
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" aria-label="Cargando" />
+          </div>
+        }
+      >
+        <AdminDashboardContent />
+      </Suspense>
+    </ProtectedSessionGate>
   );
 }

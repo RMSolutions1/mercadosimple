@@ -22,12 +22,35 @@ import { PaymentLink } from '../pago-simple/entities/payment-link.entity';
 import { QrPayment } from '../pago-simple/entities/qr-payment.entity';
 import { Settlement } from '../pago-simple/entities/settlement.entity';
 
+/** Evita URLs rotas tipo postgres:// sin host → pg intenta socket Unix y falla con ENOENT //:@//.s.PGSQL.5432 */
+function getSafeDatabaseUrl(raw: string | undefined): string | undefined {
+  const url = raw?.trim();
+  if (!url) return undefined;
+  if (!/^postgres(ql)?:\/\//i.test(url)) return undefined;
+  try {
+    const asHttp = url.replace(/^postgres(ql)?:\/\//i, 'http://');
+    const u = new URL(asHttp);
+    if (!u.hostname || u.hostname.length < 1) return undefined;
+    return url;
+  } catch {
+    return undefined;
+  }
+}
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const databaseUrl = configService.get('DATABASE_URL');
+        const rawUrl = configService.get<string>('DATABASE_URL');
+        const databaseUrl = getSafeDatabaseUrl(rawUrl);
+        if (rawUrl?.trim() && !databaseUrl) {
+          // eslint-disable-next-line no-console
+          console.error(
+            '[DatabaseModule] DATABASE_URL está definida pero es inválida (sin host o formato incorrecto). ' +
+              'Usando DB_HOST / DB_* o corregí el secret en Fly: fly secrets set DATABASE_URL="postgresql://..."',
+          );
+        }
         const allowSync = configService.get('ALLOW_SYNC') === 'true';
         const base = {
           entities: [
@@ -61,7 +84,7 @@ import { Settlement } from '../pago-simple/entities/settlement.entity';
             type: 'postgres',
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
-          };
+          } as const;
         }
         return {
           ...base,

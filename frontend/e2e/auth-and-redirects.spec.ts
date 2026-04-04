@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { e2eCreds } from './credentials';
 
 /** Envío del formulario de login (evita solapamiento visual con el panel izquierdo). */
 async function submitLoginForm(page: Page) {
@@ -46,21 +47,21 @@ test.describe('Auth y redirecciones', () => {
 
   test('Login exitoso redirige a /mi-cuenta cuando no hay returnUrl', async ({ page }) => {
     await page.goto('/auth/login');
-    await page.getByPlaceholder(/email|tu@email/i).fill('comprador@mercadosimple.com');
-    await page.getByPlaceholder(/contraseña|••••/i).fill('Comprador123*');
+    await page.getByPlaceholder(/email|tu@email/i).fill(e2eCreds.buyerEmail);
+    await page.getByPlaceholder(/contraseña|••••/i).fill(e2eCreds.buyerPassword);
     await submitLoginForm(page);
     await expect(page).toHaveURL(/\/(mi-cuenta|auth\/login)/, { timeout: 20000 });
     const url = page.url();
     if (url.includes('/auth/login')) {
-      test.skip(true, 'Login falló (API/seed). Ejecutá: cd backend && npm run seed');
+      test.skip(true, 'Login falló: API arriba + seed con SEED_DEMO_USERS=true (backend npm run seed)');
     }
     expect(url).toContain('/mi-cuenta');
   });
 
   test('Login con returnUrl redirige al returnUrl después de ingresar', async ({ page }) => {
     await page.goto('/auth/login?returnUrl=' + encodeURIComponent('/checkout'));
-    await page.getByPlaceholder(/email|tu@email/i).fill('comprador@mercadosimple.com');
-    await page.getByPlaceholder(/contraseña|••••/i).fill('Comprador123*');
+    await page.getByPlaceholder(/email|tu@email/i).fill(e2eCreds.buyerEmail);
+    await page.getByPlaceholder(/contraseña|••••/i).fill(e2eCreds.buyerPassword);
     await submitLoginForm(page);
     await expect(page).toHaveURL(/\/(checkout|mi-cuenta|auth\/login)/, { timeout: 20000 });
     const url = page.url();

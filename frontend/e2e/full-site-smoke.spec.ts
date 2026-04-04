@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { e2eCreds } from './credentials';
 
 async function submitLoginForm(page: Page) {
   await page
@@ -10,7 +11,7 @@ async function submitLoginForm(page: Page) {
 
 /**
  * Smoke / regresión amplia: carga de rutas, navegación y flujos críticos.
- * Requiere: frontend http://localhost:3000 y API http://localhost:3001 con seed.
+ * Requiere: frontend :3000, API :3001, seed admin + SEED_DEMO_USERS=true para comprador/vendedor.
  */
 const clearStorage = async (page: Page) => {
   await page.context().addInitScript(() => {
@@ -118,12 +119,12 @@ test.describe('Navegación y flujos', () => {
   test('Login seed + visita /mi-cuenta', async ({ page }) => {
     await clearStorage(page);
     await page.goto('/auth/login');
-    await page.getByPlaceholder(/email|tu@email/i).fill('comprador@mercadosimple.com');
-    await page.getByPlaceholder(/contraseña|••••/i).fill('Comprador123*');
+    await page.getByPlaceholder(/email|tu@email/i).fill(e2eCreds.buyerEmail);
+    await page.getByPlaceholder(/contraseña|••••/i).fill(e2eCreds.buyerPassword);
     await submitLoginForm(page);
     await expect(page).toHaveURL(/\/(mi-cuenta|auth\/login)/, { timeout: 20000 });
     if (page.url().includes('/auth/login')) {
-      test.skip(true, 'Login falló: comprobar API y seed (npm run seed en backend)');
+      test.skip(true, 'Login falló: API + seed con SEED_DEMO_USERS=true');
       return;
     }
     await expect(page).toHaveURL(/\/mi-cuenta/);
@@ -133,8 +134,8 @@ test.describe('Navegación y flujos', () => {
   test('Login vendedor + panel /vendedor/dashboard', async ({ page }) => {
     await clearStorage(page);
     await page.goto('/auth/login');
-    await page.getByPlaceholder(/email|tu@email/i).fill('techstore@mercadosimple.com');
-    await page.getByPlaceholder(/contraseña|••••/i).fill('Vendedor123*');
+    await page.getByPlaceholder(/email|tu@email/i).fill(e2eCreds.sellerEmail);
+    await page.getByPlaceholder(/contraseña|••••/i).fill(e2eCreds.sellerPassword);
     await submitLoginForm(page);
     await expect(page).toHaveURL(/\/(mi-cuenta|auth\/login)/, { timeout: 20000 });
     if (page.url().includes('/auth/login')) {
@@ -150,8 +151,8 @@ test.describe('Navegación y flujos', () => {
   test('Login admin + /admin accesible', async ({ page }) => {
     await clearStorage(page);
     await page.goto('/auth/login');
-    await page.getByPlaceholder(/email|tu@email/i).fill('admin@mercadosimple.com');
-    await page.getByPlaceholder(/contraseña|••••/i).fill('Admin123*');
+    await page.getByPlaceholder(/email|tu@email/i).fill(e2eCreds.adminEmail);
+    await page.getByPlaceholder(/contraseña|••••/i).fill(e2eCreds.adminPassword);
     await submitLoginForm(page);
     await expect(page).toHaveURL(/\/(mi-cuenta|auth\/login)/, { timeout: 20000 });
     if (page.url().includes('/auth/login')) {

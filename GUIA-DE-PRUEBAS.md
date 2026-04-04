@@ -166,7 +166,7 @@ Smartphones · Televisores · Laptops y PC · Audio · Gaming · Tablets · Cám
 ### 4. 🔐 FLUJO ADMINISTRADOR
 
 #### A. Acceso al panel
-1. Hacer login como `admin@mercadosimple.com / Admin123*`
+1. Hacer login con el admin del seed: email `ADMIN_SEED_EMAIL` (p. ej. `admin@mercadosimple.com`) y contraseña `ADMIN_SEED_PASSWORD` de `backend/.env` (por defecto la de `backend/.env.example`)
 2. En el menú de usuario (esquina superior derecha) → "Panel de Administración"
 3. O directamente → http://localhost:3000/admin
 

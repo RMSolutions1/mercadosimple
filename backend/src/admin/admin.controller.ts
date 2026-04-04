@@ -9,6 +9,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
 import { VerificationStatus } from '../users/entities/user.entity';
+import { OrderStatus } from '../orders/entities/order.entity';
 
 class SetVerificationDto {
   @IsEnum(VerificationStatus)
@@ -61,12 +62,54 @@ class ChangeRoleDto {
 }
 
 class UpdateOrderStatusDto {
-  @IsString()
-  status: string;
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
 
   @IsOptional()
   @IsString()
   adminNote?: string;
+}
+
+class CreateCategoryDto {
+  @IsString()
+  name: string;
+
+  @IsString()
+  slug: string;
+
+  @IsOptional()
+  @IsString()
+  icon?: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
+class UpdateCategoryDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @IsOptional()
+  @IsString()
+  icon?: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 }
 
 /** Reinicio total: TRUNCATE de todas las tablas de negocio y bootstrap de admin + categorías. */
@@ -201,6 +244,72 @@ export class AdminController {
   @ApiOperation({ summary: 'Pausar producto' })
   pauseProduct(@Param('id') id: string) {
     return this.adminService.pauseProduct(id);
+  }
+
+  @Delete('products/:id')
+  @ApiOperation({ summary: 'Dar de baja producto del catálogo (estado deleted)' })
+  adminRemoveProduct(@Param('id') id: string) {
+    return this.adminService.adminRemoveProduct(id);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Listar categorías del marketplace' })
+  getCategories() {
+    return this.adminService.getAllCategories();
+  }
+
+  @Post('categories')
+  @ApiOperation({ summary: 'Crear categoría' })
+  createCategory(@Body() dto: CreateCategoryDto) {
+    return this.adminService.createCategory(dto);
+  }
+
+  @Patch('categories/:id')
+  @ApiOperation({ summary: 'Actualizar categoría' })
+  updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+    return this.adminService.updateCategory(id, dto);
+  }
+
+  @Delete('categories/:id')
+  @ApiOperation({ summary: 'Eliminar categoría (sin productos asignados)' })
+  deleteCategory(@Param('id') id: string) {
+    return this.adminService.deleteCategory(id);
+  }
+
+  @Get('reviews')
+  @ApiOperation({ summary: 'Listar reseñas (moderación)' })
+  getReviews(@Query('page') page = 1, @Query('limit') limit = 30) {
+    return this.adminService.getAllReviews(+page, +limit);
+  }
+
+  @Delete('reviews/:id')
+  @ApiOperation({ summary: 'Eliminar reseña' })
+  deleteReview(@Param('id') id: string) {
+    return this.adminService.deleteReview(id);
+  }
+
+  @Get('questions')
+  @ApiOperation({ summary: 'Listar preguntas de productos' })
+  getQuestions(@Query('page') page = 1, @Query('limit') limit = 40) {
+    return this.adminService.getAllQuestions(+page, +limit);
+  }
+
+  @Delete('questions/:id')
+  @ApiOperation({ summary: 'Ocultar pregunta (moderación)' })
+  deleteQuestion(@Param('id') id: string) {
+    return this.adminService.deleteQuestion(id);
+  }
+
+  @Get('conversations')
+  @ApiOperation({ summary: 'Listar chats comprador–vendedor' })
+  getConversations(@Query('page') page = 1, @Query('limit') limit = 30) {
+    return this.adminService.getAllConversations(+page, +limit);
+  }
+
+  @Delete('conversations/:id')
+  @ApiOperation({ summary: 'Eliminar conversación y mensajes' })
+  deleteConversation(@Param('id') id: string) {
+    return this.adminService.deleteConversation(id);
   }
 
   @Get('orders')
