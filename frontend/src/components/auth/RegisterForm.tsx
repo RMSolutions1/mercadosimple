@@ -22,6 +22,7 @@ import { safeReturnUrl } from '@/lib/utils';
 import { authPath, type AuthBrand } from '@/lib/auth-routes';
 import { SolMayo } from '@/components/ui/SolMayo';
 import toast from 'react-hot-toast';
+import { apiErrorMessage } from '@/lib/axios';
 
 const ROLE_OPTIONS = [
   {
@@ -180,9 +181,7 @@ export function RegisterForm({ brand }: Props) {
       if (form.role === 'seller') router.push('/vendedor/dashboard');
       else router.push('/mi-cuenta');
     } catch (error: unknown) {
-      const msg = (error as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
-      const text = Array.isArray(msg) ? msg[0] : msg;
-      toast.error(text || (error as Error).message || 'Error al registrarse');
+      toast.error(apiErrorMessage(error));
     }
   };
 

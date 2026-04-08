@@ -1,12 +1,38 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, isAxiosError } from 'axios';
 import { redirectToLoginPreserveReturn } from '@/lib/auth-routes';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+/** Evita botones “colgados” si la API no responde (cold start Fly, 502, red). */
+export const API_CLIENT_TIMEOUT_MS = 55_000;
+
 const api = axios.create({
   baseURL: BASE_URL,
+  timeout: API_CLIENT_TIMEOUT_MS,
   headers: { 'Content-Type': 'application/json' },
 });
+
+/** Mensaje legible para toasts / UI (registro, login, etc.). */
+export function apiErrorMessage(error: unknown): string {
+  if (isAxiosError(error)) {
+    if (error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout')) {
+      return 'El servidor tardó demasiado en responder. Esperá unos segundos e intentá de nuevo (si usás fly.dev, la API puede estar iniciando).';
+    }
+    if (!error.response) {
+      return 'No pudimos contactar al servidor. Revisá tu conexión o probá más tarde.';
+    }
+    const st = error.response.status;
+    if (st === 502 || st === 503 || st === 504) {
+      return 'El servicio no está disponible en este momento (error del servidor). Intentá de nuevo en un minuto.';
+    }
+    const data = error.response.data as { message?: string | string[] } | undefined;
+    const msg = data?.message;
+    if (Array.isArray(msg)) return msg[0] ?? 'Error en la solicitud';
+    if (typeof msg === 'string') return msg;
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return 'Ocurrió un error. Intentá de nuevo.';
+}
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
@@ -59,7 +85,7 @@ api.interceptors.response.use(
 
         if (!refreshToken) throw new Error('No refresh token');
 
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken }, { timeout: API_CLIENT_TIMEOUT_MS });
 
         const newAccessToken = data.accessToken;
         const newRefreshToken = data.refreshToken;

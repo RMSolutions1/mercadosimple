@@ -52,6 +52,10 @@ function getSafeDatabaseUrl(raw: string | undefined): string | undefined {
           );
         }
         const allowSync = configService.get('ALLOW_SYNC') === 'true';
+        const poolOpts = {
+          /** Evita que Nest quede colgado minutos si Postgres no responde (Fly/502). */
+          connectionTimeoutMillis: 15000,
+        };
         const base = {
           entities: [
             User,
@@ -84,6 +88,7 @@ function getSafeDatabaseUrl(raw: string | undefined): string | undefined {
             type: 'postgres',
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
+            extra: poolOpts,
           } as const;
         }
         return {
@@ -95,6 +100,7 @@ function getSafeDatabaseUrl(raw: string | undefined): string | undefined {
           password: configService.get('DB_PASSWORD', 'mercadosimple123'),
           database: configService.get('DB_DATABASE', 'mercadosimple'),
           ssl: configService.get('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+          extra: poolOpts,
         };
       },
       inject: [ConfigService],

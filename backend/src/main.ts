@@ -22,7 +22,9 @@ async function bootstrap() {
   );
 
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const allowedOrigins = frontendUrl.split(',').map((url) => url.trim());
+  const fromEnv = frontendUrl.split(',').map((url) => url.trim()).filter(Boolean);
+  /** Staging Fly: el front suele estar en fly.dev aunque FRONTEND_URL sea solo el dominio propio. */
+  const allowedOrigins = [...new Set([...fromEnv, 'https://mercadosimple-web.fly.dev'])];
   const isDevLocalOrigin = (o: string) =>
     /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(o);
 
