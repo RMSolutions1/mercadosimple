@@ -1,0 +1,21 @@
+{
+  "name": "mercadosimple-monorepo",
+  "private": true,
+  "description": "Mercado Simple — monorepo (frontend Next.js + backend NestJS)",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w mercado-simple-frontend",
+    "dev:frontend": "npm run dev -w mercado-simple-frontend",
+    "dev:backend": "npm run start:dev -w mercado-simple-backend",
+    "build": "npm run build -w mercado-simple-frontend",
+    "build:frontend": "npm run build -w mercado-simple-frontend",
+    "build:backend": "npm run build -w mercado-simple-backend",
+    "build:all": "npm run build -w mercado-simple-frontend && npm run build -w mercado-simple-backend"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

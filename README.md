@@ -29,6 +29,9 @@ Plataforma marketplace full-stack para Argentina, competidora directa de Mercado
 git clone https://github.com/RMSolutions1/mercadosimple.git
 cd "mercado simple"
 
+# Monorepo (workspaces): un solo install en la raíz; `npm run dev` levanta el frontend (útil para v0 / Vercel)
+npm install
+
 # Iniciar base de datos
 docker-compose up -d postgres
 ```
