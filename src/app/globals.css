@@ -1,0 +1,375 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Playfair+Display:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   VARIABLES DE DISEÑO ARGENTINO
+   ============================================= */
+:root {
+  --arg-celeste: #74ACDF;
+  --arg-celeste-dark: #4A8AC4;
+  --arg-celeste-light: #E8F4FD;
+  --arg-sol: #F6B40E;
+  --arg-sol-dark: #D4960A;
+  --arg-blanco: #FFFFFF;
+  --arg-verde: #007140;
+  --arg-tierra: #8B5E3C;
+  --arg-campo: #6B8F3A;
+
+  /* Espaciado y tipografía */
+  --radius-card: 16px;
+  --radius-btn: 12px;
+  --shadow-card: 0 2px 16px rgba(74,138,196,0.10);
+  --shadow-hover: 0 8px 32px rgba(74,138,196,0.20);
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Lato', system-ui, sans-serif;
+    @apply text-gray-900 bg-gray-50 dark:text-gray-100 dark:bg-gray-950;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Raleway', system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  /* Dark mode base overrides */
+  .dark {
+    color-scheme: dark;
+  }
+
+  .dark .bg-white      { background-color: #1E293B !important; }
+  .dark .bg-gray-50    { background-color: #0F172A !important; }
+  .dark .bg-gray-100   { background-color: #1E293B !important; }
+  .dark .bg-white\/5   { background-color: rgba(255,255,255,0.05) !important; }
+
+  /* Text colors */
+  .dark .text-gray-900 { color: #F1F5F9 !important; }
+  .dark .text-gray-800 { color: #E2E8F0 !important; }
+  .dark .text-gray-700 { color: #CBD5E1 !important; }
+  .dark .text-gray-600 { color: #94A3B8 !important; }
+  .dark .text-gray-500 { color: #64748B !important; }
+  .dark .text-gray-400 { color: #94A3B8 !important; }
+
+  /* Borders */
+  .dark .border-gray-100 { border-color: #334155 !important; }
+  .dark .border-gray-200 { border-color: #334155 !important; }
+  .dark .border-gray-300 { border-color: #475569 !important; }
+
+  /* Inputs - ensure visible in both modes */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: #1E293B !important;
+    color: #F1F5F9 !important;
+    border-color: #334155 !important;
+  }
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #475569 !important;
+  }
+
+  /* Fix inline-style white backgrounds */
+  .dark .card-inline { background-color: #1E293B !important; }
+}
+
+/* ── MODAL LIGHT: fuerza modo claro dentro de modales sobre fondos oscuros ── */
+.modal-light,
+.modal-light * {
+  color-scheme: light !important;
+}
+.modal-light { background-color: #FFFFFF !important; color: #111827 !important; }
+.modal-light .bg-white,
+.modal-light .bg-gray-50,
+.modal-light .bg-gray-100 {
+  background-color: revert !important;
+}
+.modal-light .text-gray-900 { color: #111827 !important; }
+.modal-light .text-gray-800 { color: #1F2937 !important; }
+.modal-light .text-gray-700 { color: #374151 !important; }
+.modal-light .text-gray-600 { color: #4B5563 !important; }
+.modal-light .text-gray-500 { color: #6B7280 !important; }
+.modal-light .text-gray-400 { color: #9CA3AF !important; }
+.modal-light .border-gray-100 { border-color: #F3F4F6 !important; }
+.modal-light .border-gray-200 { border-color: #E5E7EB !important; }
+.modal-light .border-gray-300 { border-color: #D1D5DB !important; }
+.modal-light input,
+.modal-light textarea,
+.modal-light select {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+.modal-light input::placeholder,
+.modal-light textarea::placeholder { color: #9CA3AF !important; }
+
+/* =============================================
+   COMPONENTES BASE
+   ============================================= */
+@layer components {
+
+  /* ---- BOTONES ---- */
+  .btn-primary {
+    @apply bg-arg-celeste-dark text-white px-5 py-2.5 rounded-xl font-semibold
+           hover:bg-arg-celeste transition-all duration-200 shadow-sm
+           hover:shadow-arg disabled:opacity-50 disabled:cursor-not-allowed
+           active:scale-[0.98];
+    font-family: 'Raleway', sans-serif;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-arg-celeste-dark border-2 border-arg-celeste-dark px-5 py-2.5
+           rounded-xl font-semibold hover:bg-arg-celeste-light transition-all duration-200;
+    font-family: 'Raleway', sans-serif;
+  }
+
+  .btn-gold {
+    @apply bg-arg-sol text-white px-5 py-2.5 rounded-xl font-bold
+           hover:bg-arg-sol-dark transition-all duration-200 shadow-sol;
+    font-family: 'Raleway', sans-serif;
+  }
+
+  .btn-green {
+    @apply bg-arg-verde text-white px-5 py-2.5 rounded-xl font-semibold
+           hover:bg-green-800 transition-all duration-200 shadow-sm
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ---- CARDS ---- */
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100
+           hover:shadow-arg transition-shadow duration-200;
+  }
+
+  .card-argentina {
+    background: white;
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(74,138,196,0.15);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-argentina:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  /* ---- INPUTS ---- */
+  .input-field {
+    @apply w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900
+           focus:outline-none focus:border-arg-celeste focus:ring-2 focus:ring-arg-celeste/20
+           transition-colors bg-white placeholder:text-gray-400;
+  }
+
+  /* Input de monto con prefijo $ — visible en todos los contextos */
+  .input-amount {
+    @apply w-full rounded-xl text-lg font-bold text-gray-900 bg-gray-50 outline-none transition-all
+           border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15
+           placeholder:text-gray-300;
+  }
+
+  /* Input estándar para formularios de billetera */
+  .input-wallet {
+    @apply w-full px-4 py-3 rounded-xl text-sm text-gray-900 bg-gray-50 outline-none transition-all
+           border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15
+           placeholder:text-gray-400;
+  }
+
+  /* ---- BADGES ---- */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  /* ---- BANDERA STRIPE ---- */
+  .flag-stripe {
+    height: 4px;
+    background: linear-gradient(90deg,
+      #74ACDF 0%, #74ACDF 33.33%,
+      #FFFFFF 33.33%, #FFFFFF 66.66%,
+      #74ACDF 66.66%, #74ACDF 100%
+    );
+  }
+
+  /* ---- SOL DE MAYO ---- */
+  .sol-mayo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, #F6B40E 40%, #D4960A 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(246,180,14,0.5), 0 0 40px rgba(246,180,14,0.2);
+    animation: spin-slow 30s linear infinite;
+  }
+
+  /* ---- GRADIENT HEADERS ---- */
+  .header-arg {
+    background: linear-gradient(160deg, #1E3A5F 0%, #2E6DA8 45%, #4A8AC4 80%, #74ACDF 100%);
+  }
+
+  .header-arg-light {
+    background: linear-gradient(135deg, #E8F4FD 0%, #C5E1F7 50%, #9DCEF0 100%);
+  }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar-argentina {
+    background: linear-gradient(180deg, #1E3A5F 0%, #2E6DA8 100%);
+  }
+
+  /* ---- STAT CARD ---- */
+  .stat-card {
+    @apply bg-white rounded-2xl p-5 border border-gray-100;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s ease;
+  }
+  .stat-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  /* ---- NAV PILL ---- */
+  .nav-pill {
+    @apply px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap;
+  }
+}
+
+/* =============================================
+   UTILIDADES ESPECIALES ARGENTINAS
+   ============================================= */
+@layer utilities {
+  .text-arg-gradient {
+    background: linear-gradient(135deg, #74ACDF, #F6B40E);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-arg-subtle {
+    background: linear-gradient(135deg, #E8F4FD 0%, #FEFEFE 50%, #E8F4FD 100%);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* =============================================
+   SCROLLBAR ESTILIZADO
+   ============================================= */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: var(--arg-celeste); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--arg-celeste-dark); }
+
+/* =============================================
+   ANIMACIONES
+   ============================================= */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(246,180,14,0.4); }
+  50% { box-shadow: 0 0 20px rgba(246,180,14,0.8), 0 0 40px rgba(246,180,14,0.4); }
+}
+
+/* Sol de Mayo animation */
+.animate-spin-slow { animation: spin-slow 30s linear infinite; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Focus visible accesible */
+:focus-visible {
+  outline: 2px solid var(--arg-celeste);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* =============================================
+   ESTILOS DE IMPRESIÓN / PDF
+   ============================================= */
+@media print {
+  /* Ocultar navegación y elementos de UI */
+  nav,
+  header,
+  footer,
+  .print\:hidden,
+  [class*="Navbar"],
+  [class*="Footer"],
+  [class*="CartDrawer"] {
+    display: none !important;
+  }
+
+  /* Fondo blanco y texto negro para impresión */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+  }
+
+  /* Asegurar que los colores de fondo se impriman */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Saltos de página */
+  .page-break-before { page-break-before: always; }
+  .page-break-after  { page-break-after: always; }
+  .no-page-break     { page-break-inside: avoid; }
+
+  /* Expandir el contenido al ancho completo */
+  .max-w-5xl,
+  .max-w-4xl,
+  .max-w-3xl,
+  .max-w-2xl {
+    max-width: 100% !important;
+  }
+
+  /* Padding reducido para impresión */
+  .py-8 { padding-top: 0 !important; padding-bottom: 0 !important; }
+  .px-4 { padding-left: 8px !important; padding-right: 8px !important; }
+
+  /* Comprobante de servicio: solo mostrar la boleta */
+  #comprobante-root > *:not(#boleta):not(.max-w-lg:has(#boleta)) {
+    display: none !important;
+  }
+  /* Ocultar sidebar en dashboard al imprimir */
+  aside, [class*="sidebar"], [class*="Sidebar"] {
+    display: none !important;
+  }
+}
