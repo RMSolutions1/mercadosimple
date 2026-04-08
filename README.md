@@ -12,7 +12,7 @@ Plataforma marketplace full-stack para Argentina, competidora directa de Mercado
 | Autenticación | JWT + Refresh Tokens, bcrypt (costo 12) |
 | Email | Nodemailer (SMTP) o Resend API |
 | Pagos | Mercado Pago SDK + Billetera interna (Pago Simple) |
-| Infraestructura | Docker, Nginx, Let's Encrypt · **Fly.io** (ver [DEPLOY.md](DEPLOY.md)) |
+| Infraestructura | Docker, Nginx, Let's Encrypt · **Fly.io** ([DEPLOY.md](DEPLOY.md)) · **Vercel** ([VERCEL.md](VERCEL.md)) |
 
 ---
 

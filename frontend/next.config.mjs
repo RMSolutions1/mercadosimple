@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
+const isVercel = process.env.VERCEL === '1';
+
 const nextConfig = {
-  output: 'standalone',
+  // Vercel maneja el despliegue de Next por su cuenta; standalone es para Docker/Fly.
+  ...(isVercel ? {} : { output: 'standalone' }),
   experimental: {
     // Suppress CSR bail-out error for client components
     missingSuspenseWithCSRBailout: false,

@@ -2,6 +2,8 @@
 
 Guía para dejar **Mercado Simple** listo para operaciones reales en Fly.io.
 
+Para **Vercel** (Next + Nest serverless), usá **[VERCEL.md](VERCEL.md)**.
+
 ## Después de un push: pasos en tu máquina (con Fly CLI)
 
 Si el código ya está en GitHub, solo tenés que ejecutar en tu PC (con [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/) instalado y `fly auth login` hecho):

@@ -14,6 +14,7 @@ frontend/next-env.d.ts
 # ─── NestJS build (backend) ───────────────────────────────────
 backend/dist/
 backend/.build/
+backend/.vercel/
 
 # ─── Variables de entorno — NUNCA subir al repo ───────────────
 .env
